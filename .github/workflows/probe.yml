@@ -1,0 +1,19 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: connectivity
+        run: |
+          for u in \
+            "https://fapi.binance.com/fapi/v1/ping" \
+            "https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1m&limit=2" \
+            "https://api.binance.com/api/v3/ping" \
+            "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=2" \
+            "https://api.bybit.com/v5/market/kline?category=linear&symbol=BTCUSDT&interval=1&limit=2" \
+            "https://www.okx.com/api/v5/market/candles?instId=BTC-USDT-SWAP&bar=1m&limit=2" \
+            "https://nfs.faireconomy.media/ff_calendar_thisweek.json" \
+            "https://api.llama.fi/hacks"; do
+            code=$(curl -s -o /tmp/o -w "%{http_code}" -m 20 "$u"); echo "$code  $u  $(head -c 90 /tmp/o | tr '\n' ' ')"
+          done
