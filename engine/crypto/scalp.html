@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scalp Book</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Segoe UI,sans-serif;margin:0;padding:16px}.wrap{max-width:1250px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}.mut{color:var(--mut)}a{color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.stat{background:#0e1116;border:1px solid var(--line);border-radius:8px;padding:8px 12px}.big{font-size:22px;font-weight:700}.tag{font-size:12px;color:var(--mut)}
+table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:6px 8px;border-bottom:1px solid #21262d;font-size:13px;white-space:nowrap}
+tr.row{cursor:pointer}tr.row:hover{background:#1c2230}.tw{overflow-x:auto}
+.up{color:var(--up)}.dn{color:var(--dn)}.b{display:inline-block;border-radius:4px;padding:1px 8px;font-weight:700;font-size:12px}
+.bw{background:#3d3200;color:var(--warn)}.bo{background:#1f2a44;color:var(--blue)}.bg{background:#1b4332;color:var(--up)}.br{background:#4a1d1d;color:var(--dn)}.bx{background:#2a2f38;color:var(--mut)}
+.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:10px 0}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:14px;z-index:9}#modal .box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;max-width:980px;width:100%}
+#cv{width:100%;height:380px;display:block;background:#0e1116;border:1px solid var(--line);border-radius:6px}.x{float:right;cursor:pointer;color:var(--mut);font-size:20px}
+</style></head><body><div class="wrap">
+<h1>Scalp Book: paper trades <small class="mut" id="ts"></small> &nbsp;<a href="/hub.html" style="font-size:13px">&larr; hub</a></h1>
+<div class="mut">10 limit-order entries for 1-2 hour trades, tracked on 1-minute candles. Nothing here places real orders. Click a row for the chart.</div>
+<div class="note" id="rules"></div>
+<div class="card"><div class="grid" id="stats"></div></div>
+<div class="card"><h2>Orders</h2><div class="tw"><table id="t"></table></div></div>
+<div class="card"><h2>How the paper book decides</h2><div class="mut" style="font-size:13px">
+<b>Fill:</b> a closed 1-minute candle trades down to the buy limit (gap-through fills at the open). Unfilled after 2 hours = expired.<br>
+<b>Fill candle:</b> only the stop is checked there (conservative).<br>
+<b>TP1:</b> sells half and moves the stop on the rest to your entry. The rest goes to TP2 if set, otherwise rides to the time exit.<br>
+<b>Exits:</b> stop, TP2, time exit 2 hours after the fill, or the news cutoff (open trades closed and unfilled orders cancelled). BTC kill switch cancels unfilled orders.<br>
+<b>Money:</b> each trade risks $2 (position = $2 / stop distance). Fee 0.14% round trip. Trades are tracked independently: if all 10 filled at once you would need far more than $100.</div></div>
+</div>
+<div id="modal"><div class="box"><span class="x" onclick="modal.style.display='none'">&times;</span><h2 id="mt"></h2><canvas id="cv"></canvas><div class="tag" id="mn"></div></div></div>
+<script>
+const $=id=>document.getElementById(id),modal=$('modal');let V=null;
+const cl=v=>v>0?'up':v<0?'dn':'';const usd=v=>(v>=0?'+$':'-$')+Math.abs(v).toFixed(2);
+const f=v=>v==null?'-':(v<1?(+v).toPrecision(4):v<100?(+v).toFixed(3):(+v).toFixed(2));
+const tm=ms=>ms?new Date(ms).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'-';
+function badge(t){const s=t.status,r=t.result;
+ if(s==='pending')return '<span class="b bw">WAITING</span>';
+ if(s==='open')return t.half?'<span class="b bg">OPEN &middot; TP1 hit</span>':'<span class="b bo">FILLED &middot; open</span>';
+ if(s==='expired')return '<span class="b bx">NOT FILLED</span>';
+ if(s==='cancelled')return '<span class="b bx">CANCELLED</span>';
+ return t.pnl>0?`<span class="b bg">WIN &middot; ${r}</span>`:`<span class="b br">LOSS &middot; ${r}</span>`}
+async function load(){try{V=await (await fetch('/api/scalp',{cache:'no-store'})).json();render()}catch(e){}}
+function render(){if(!V||V.error)return;const s=V.stats,b=Object.values(V.batches)[0]||{};
+ $('ts').textContent='updated '+tm(V.ts);
+ $('rules').innerHTML=`<b>Batch 1</b> placed ${tm(b.placed)} local time. <b>News cutoff ${tm(b.cutoff)}</b> (US Durable Goods 15:30): unfilled orders cancel and open trades close then. BTC kill switch: cancel unfilled orders if BTC < ${(b.btc_kill||0).toLocaleString()}.`;
+ const wr=s.closed?Math.round(100*s.wins/s.closed)+'%':'-';
+ $('stats').innerHTML=[['Placed',s.placed],['Waiting',s.waiting],['Filled',s.filled],['Open now',s.open],['Not filled / cancelled',s.unfilled],['Reached TP1',s.tp1_hit],['Stopped out',s.stopped],['Closed wins',s.wins],['Closed losses',s.losses],['Win rate (closed)',wr]]
+  .map(([k,v])=>`<div class="stat"><div class="tag">${k}</div><div class="big">${v}</div></div>`).join('')+
+  `<div class="stat"><div class="tag">Realized P/L</div><div class="big ${cl(s.realized)}">${usd(s.realized)}</div></div><div class="stat"><div class="tag">Net now (incl. open)</div><div class="big ${cl(s.net_now)}">${usd(s.net_now)}</div></div>`;
+ const rows=[...V.trades].sort((a,b)=>({open:0,pending:1,closed:2,expired:3,cancelled:3}[a.status]-({open:0,pending:1,closed:2,expired:3,cancelled:3}[b.status])));
+ $('t').innerHTML='<tr><th>Coin</th><th>Status</th><th>Buy limit</th><th>Now</th><th>To entry</th><th>Stop</th><th>TP1</th><th>TP2</th><th>Risk</th><th>Size</th><th>Filled</th><th>Closed</th><th>P/L</th><th>R</th></tr>'+
+  rows.map(t=>`<tr class="row" onclick='chart("${t.id}")' title="${(t.reason||'').replace(/"/g,'')}"><td><b>${t.sym.replace('USDT','')}</b></td><td>${badge(t)}</td><td>${f(t.entry)}</td><td>${f(t.price)}</td><td class="${t.status==='pending'?(t.dist_pct<0?'dn':'up'):'mut'}">${t.status==='pending'&&t.dist_pct!=null?(t.dist_pct>0?'+':'')+t.dist_pct+'%':'-'}</td><td class="dn">${f(t.stop_cur||t.stop)}</td><td class="up">${f(t.tp1)}</td><td>${f(t.tp2)}</td><td>${t.risk_pct}%</td><td>$${Math.round(t.notional)}</td><td>${tm(t.filled_at)}</td><td>${tm(t.closed_at)}</td><td class="${cl(t.total)}">${t.status==='pending'||t.status==='expired'||t.status==='cancelled'?'-':usd(t.total)}</td><td class="${cl(t.r)}">${t.r==null?'-':t.r+'R'}</td></tr>`).join('')}
+async function chart(id){const t=V.trades.find(x=>x.id===id);if(!t)return;modal.style.display='flex';$('mt').textContent=t.sym.replace('USDT','')+' LONG limit '+f(t.entry)+'  |  '+t.status.toUpperCase()+(t.result?' ('+t.result+')':'');
+ $('mn').textContent=t.reason;const from=t.placed-90*60000;let d=[];try{d=await (await fetch(`/api/candles?symbol=${t.sym.replace('USDT','')}&tf=1m&from=${from}`)).json()}catch(e){}
+ const cv=$('cv'),W=cv.clientWidth,H=380,dp=devicePixelRatio||1;cv.width=W*dp;cv.height=H*dp;const g=cv.getContext('2d');g.scale(dp,dp);g.fillStyle='#0e1116';g.fillRect(0,0,W,H);
+ if(!d.length)return;const lv=[t.entry,t.stop,t.tp1,t.tp2].filter(x=>x);let hi=Math.max(...d.map(x=>x[2]),...lv),lo=Math.min(...d.map(x=>x[3]),...lv);const pad=(hi-lo)*.05;hi+=pad;lo-=pad;
+ const L=62,R=8,T=8,B=20,X=i=>L+(i+.5)/d.length*(W-L-R),Y=p=>T+(1-(p-lo)/(hi-lo))*(H-T-B);
+ g.font='11px system-ui';g.fillStyle='#8b949e';for(let k=0;k<=4;k++){const p=lo+(hi-lo)*k/4;g.strokeStyle='#21262d';g.beginPath();g.moveTo(L,Y(p));g.lineTo(W-R,Y(p));g.stroke();g.fillText(f(p),4,Y(p)+4)}
+ const w=Math.max(1,(W-L-R)/d.length*.7);d.forEach((c,i)=>{const up=c[4]>=c[1];g.strokeStyle=g.fillStyle=up?'#3fb950':'#f85149';g.beginPath();g.moveTo(X(i),Y(c[2]));g.lineTo(X(i),Y(c[3]));g.stroke();g.fillRect(X(i)-w/2,Math.min(Y(c[1]),Y(c[4])),w,Math.max(1,Math.abs(Y(c[1])-Y(c[4]))))});
+ [[t.entry,'#58a6ff','buy limit'],[t.stop,'#f85149','stop'],[t.tp1,'#3fb950','TP1'],[t.tp2,'#a371f7','TP2']].forEach(([p,c,n])=>{if(!p)return;g.strokeStyle=c;g.setLineDash([5,4]);g.beginPath();g.moveTo(L,Y(p));g.lineTo(W-R,Y(p));g.stroke();g.setLineDash([]);g.fillStyle=c;g.fillText(n+' '+f(p),L+4,Y(p)-3)});
+ const mark=(ms,c,n)=>{if(!ms)return;const i=d.findIndex(x=>x[0]>=ms);if(i<0)return;g.fillStyle=c;g.beginPath();g.arc(X(i),H-B+2,4,0,7);g.fill();g.fillText(n,X(i)+6,H-B+6)};mark(t.placed,'#f0b90b','placed');mark(t.filled_at,'#58a6ff','filled');mark(t.closed_at,'#fff','closed')}
+load();setInterval(load,15000);
+</script></body></html>

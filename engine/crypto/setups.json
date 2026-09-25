@@ -1,0 +1,222 @@
+[
+ {
+  "symbol": "UNI",
+  "tf": "1h",
+  "side": "long",
+  "score": 88,
+  "rr": 2.85,
+  "status": "IN ZONE now",
+  "entry": 9.5105,
+  "sl": 9.004092857142856,
+  "tp1": 10.953,
+  "tp2": 10.953,
+  "chart": "UNI_1h_long.png",
+  "why": "Swept sell-side liquidity at 9.0580 and closed back above it, then broke structure at 9.2540. Entry at the FVG (9.4100-9.6110). 1D bias: bull. In discount.",
+  "price": 9.61,
+  "sd": 0.053247162910167095,
+  "lev": 11,
+  "notional": 1878.034331494981,
+  "margin": 170.730393772271,
+  "fee_r": 0.018780343314949807,
+  "ts": 1790362800000,
+  "ann": {
+   "lvl": 9.058,
+   "sweep_ts": 1790319600000,
+   "ref_ts": 1790298000000,
+   "refp": 9.254,
+   "mss_ts": 1790323200000,
+   "zone_ts": 1790330400000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 7,
+  "htf_d": false,
+  "zone": [
+   9.41,
+   9.611
+  ],
+  "daily": {
+   "close": 9.145,
+   "ema50": 6.172669066854496,
+   "ema50_prev": 5.041860387415382
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "MUBARAK",
+  "tf": "1h",
+  "side": "long",
+  "score": 79,
+  "rr": 1.76,
+  "status": "waiting for retrace",
+  "entry": 0.04847,
+  "sl": 0.04087542857142857,
+  "tp1": 0.06182,
+  "tp2": 0.08781,
+  "chart": "MUBARAK_1h_long.png",
+  "why": "Swept sell-side liquidity at 0.04206 and closed back above it, then broke structure at 0.04906. Entry at the FVG (0.04773-0.04921). 1D bias: bull. In discount.",
+  "price": 0.05503,
+  "sd": 0.15668602080815824,
+  "lev": 4,
+  "notional": 638.2190286294721,
+  "margin": 159.55475715736802,
+  "fee_r": 0.006382190286294721,
+  "ts": 1790362800000,
+  "ann": {
+   "lvl": 0.04206,
+   "sweep_ts": 1790334000000,
+   "ref_ts": 1790254800000,
+   "refp": 0.04906,
+   "mss_ts": 1790344800000,
+   "zone_ts": 1790341200000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 2,
+  "htf_d": true,
+  "zone": [
+   0.04773,
+   0.04921
+  ],
+  "daily": {
+   "close": 0.04456,
+   "ema50": 0.028784605401838907,
+   "ema50_prev": 0.022593720084108034
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "ZAMA",
+  "tf": "1h",
+  "side": "long",
+  "score": 73,
+  "rr": 1.94,
+  "status": "waiting for retrace",
+  "entry": 0.09112500000000001,
+  "sl": 0.08595007142857143,
+  "tp1": 0.10117,
+  "tp2": 0.108,
+  "chart": "ZAMA_1h_long.png",
+  "why": "Swept sell-side liquidity at 0.08643 and closed back above it, then broke structure at 0.09146. Entry at the FVG (0.09084-0.09141). 1D bias: bull. In discount.",
+  "price": 0.09159,
+  "sd": 0.05678933960415451,
+  "lev": 11,
+  "notional": 1760.893870170738,
+  "margin": 160.08126092461254,
+  "fee_r": 0.01760893870170738,
+  "ts": 1790362800000,
+  "ann": {
+   "lvl": 0.08643,
+   "sweep_ts": 1790319600000,
+   "ref_ts": 1790305200000,
+   "refp": 0.09146,
+   "mss_ts": 1790326800000,
+   "zone_ts": 1790352000000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 2,
+  "htf_d": false,
+  "zone": [
+   0.09084,
+   0.09141
+  ],
+  "daily": {
+   "close": 0.08858,
+   "ema50": 0.05775005449924811,
+   "ema50_prev": 0.04827611581044764
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "ADA",
+  "tf": "1h",
+  "side": "long",
+  "score": 58,
+  "rr": 1.55,
+  "status": "waiting for retrace",
+  "entry": 0.25045,
+  "sl": 0.24527214285714286,
+  "tp1": 0.2585,
+  "tp2": 0.2623,
+  "chart": "ADA_1h_long.png",
+  "why": "Swept sell-side liquidity at 0.2462 and closed back above it, then broke structure at 0.2532. Entry at the FVG (0.2494-0.2515). 1D bias: bull. Not in ideal half of range.",
+  "price": 0.2552,
+  "sd": 0.020674214984456582,
+  "lev": 20,
+  "notional": 4836.943026624354,
+  "margin": 241.84715133121773,
+  "fee_r": 0.048369430266243546,
+  "ts": 1790362800000,
+  "ann": {
+   "lvl": 0.2462,
+   "sweep_ts": 1790319600000,
+   "ref_ts": 1790298000000,
+   "refp": 0.2532,
+   "mss_ts": 1790334000000,
+   "zone_ts": 1790319600000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 2,
+  "htf_d": true,
+  "zone": [
+   0.2494,
+   0.2515
+  ],
+  "daily": {
+   "close": 0.2476,
+   "ema50": 0.20899107983030069,
+   "ema50_prev": 0.19942850844332094
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "ATOM",
+  "tf": "1h",
+  "side": "short",
+  "score": 55,
+  "rr": 1.85,
+  "status": "IN ZONE now",
+  "entry": 1.7810000000000001,
+  "sl": 1.8360178571428571,
+  "tp1": 1.679,
+  "tp2": 1.666,
+  "chart": "ATOM_1h_short.png",
+  "why": "Swept buy-side liquidity at 1.8150 and closed back below it, then broke structure at 1.7730. Entry at the OB (1.7660-1.7960). 1D bias: bull. In premium.",
+  "price": 1.766,
+  "sd": 0.0308915537017726,
+  "lev": 19,
+  "notional": 3237.130801687772,
+  "margin": 170.375305351988,
+  "fee_r": 0.03237130801687772,
+  "ts": 1790362800000,
+  "ann": {
+   "lvl": 1.815,
+   "sweep_ts": 1790326800000,
+   "ref_ts": 1790319600000,
+   "refp": 1.773,
+   "mss_ts": 1790352000000,
+   "zone_ts": 1790344800000,
+   "kind": "OB"
+  },
+  "std": false,
+  "touches": 4,
+  "htf_d": true,
+  "zone": [
+   1.766,
+   1.796
+  ],
+  "daily": {
+   "close": 1.783,
+   "ema50": 1.601555942053176,
+   "ema50_prev": 1.5480084080616257
+  },
+  "bias": "bull",
+  "kind": "OB"
+ }
+]

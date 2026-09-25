@@ -1,0 +1,50 @@
+<!doctype html><meta charset=utf-8><title>Setups</title><style>
+body{background:#0e1116;color:#c9d1d9;font:14px system-ui;margin:0;padding:16px}h1{font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(560px,1fr));gap:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px}.card img{width:100%;border-radius:4px}
+.hd{display:flex;gap:10px;align-items:center;margin-bottom:6px}.tf{color:#8b949e}.sc{margin-left:auto}.st{color:#f0b90b}
+.tag{padding:2px 8px;border-radius:4px;font-weight:700}.buy{background:#1b4332;color:#3fb950}.sell{background:#4a1d1d;color:#f85149}
+.perf{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;margin:12px 0}table{border-collapse:collapse}td,th{padding:4px 12px;text-align:left}
+.win{color:#3fb950}.loss{color:#f85149}.open{color:#58a6ff}.pending,.expired{color:#8b949e}h2{margin:0 0 6px}.nums{margin:6px 0}p{color:#8b949e;margin:4px 0 0}</style>
+<h1>ICT/SMC setups &mdash; 2026-09-25 22:25 &mdash; 0 STANDARD of 5 setups from 100 coins &nbsp;<a href="/hub.html" style="font-size:14px;color:#58a6ff">&larr; hub</a></h1>
+<p>Research aid only, not financial advice. Limit-order style entries; stop is beyond the sweep.</p>
+<div id=live class=perf><h2>Live paper trades</h2><p id=livetxt>Start the server (run_daily.bat) to see live P/L.</p></div>
+<div class=perf><h2>Paper-trade results</h2><p>5 setups tracked &middot; pending 5 &middot; open 0 &middot; closed 0 &middot; expired 0</p><p>No closed trades yet. Results build up as setups play out.</p><details><summary>Recent trades</summary><table><tr><th>Added<th>Coin<th>TF<th>Side<th>Score<th>Entry<th>State<th>R</tr><tr><td>2026-09-25 22:12<td>UNI<td>1h<td>BUY<td>88<td>9.5105<td class=pending>pending<td></tr><tr><td>2026-09-25 22:12<td>ZAMA<td>1h<td>BUY<td>73<td>0.091125<td class=pending>pending<td></tr><tr><td>2026-09-25 22:12<td>ATOM<td>1h<td>SELL<td>55<td>1.781<td class=pending>pending<td></tr><tr><td>2026-09-25 21:48<td>MUBARAK<td>1h<td>BUY<td>79<td>0.04847<td class=pending>pending<td></tr><tr><td>2026-09-25 21:48<td>ADA<td>1h<td>BUY<td>59<td>0.25045<td class=pending>pending<td></tr></table></details></div><h2>STANDARD setups <small style="color:#8b949e;font-weight:400">(4h buy, S/R level, daily trend up: the only ones that alert)</small></h2>
+<div class=grid><p>None right now.</p></div>
+<details style="margin-top:18px"><summary style="cursor:pointer;color:#8b949e">Not standard: tracked for comparison, the backtests say do not trade these (5)</summary><div class=grid style="margin-top:10px;opacity:.75"><div class=card><div class=hd><b>UNI/USDT</b> <span class=tf>1h</span>
+<span class="tag buy">BUY</span><span class=sc>score 88</span>
+<span class=st>IN ZONE now</span></div>
+<div class=nums>Price at scan <b>9.6100</b> &middot; price is at/through the entry zone</div>
+<img src="charts/UNI_1h_long.png" loading=lazy>
+<div class=nums>Entry <b>9.5105</b> &middot; Stop <b>9.0041</b> &middot; TP1 <b>10.9530</b> &middot; R:R <b>2.85</b></div>
+<div class=nums>Futures: max <b>11x</b> leverage (liquidation stays beyond the stop) &middot; $100 risk = <b>$1,878</b> position, <b>$171</b> margin &middot; stop is 5.3% away</div>
+<p>Swept sell-side liquidity at 9.0580 and closed back above it, then broke structure at 9.2540. Entry at the FVG (9.4100-9.6110). 1D bias: bull. In discount.</p></div><div class=card><div class=hd><b>MUBARAK/USDT</b> <span class=tf>1h</span>
+<span class="tag buy">BUY</span><span class=sc>score 79</span>
+<span class=st>waiting for retrace</span></div>
+<div class=nums>Price at scan <b>0.05503</b> &middot; LIMIT ORDER: only fills if price returns to the entry</div>
+<img src="charts/MUBARAK_1h_long.png" loading=lazy>
+<div class=nums>Entry <b>0.04847</b> &middot; Stop <b>0.0408754</b> &middot; TP1 <b>0.06182</b> &middot; R:R <b>1.76</b></div>
+<div class=nums>Futures: max <b>4x</b> leverage (liquidation stays beyond the stop) &middot; $100 risk = <b>$638</b> position, <b>$160</b> margin &middot; stop is 15.7% away</div>
+<p>Swept sell-side liquidity at 0.04206 and closed back above it, then broke structure at 0.04906. Entry at the FVG (0.04773-0.04921). 1D bias: bull. In discount.</p></div><div class=card><div class=hd><b>ZAMA/USDT</b> <span class=tf>1h</span>
+<span class="tag buy">BUY</span><span class=sc>score 73</span>
+<span class=st>waiting for retrace</span></div>
+<div class=nums>Price at scan <b>0.09159</b> &middot; LIMIT ORDER: only fills if price returns to the entry</div>
+<img src="charts/ZAMA_1h_long.png" loading=lazy>
+<div class=nums>Entry <b>0.091125</b> &middot; Stop <b>0.0859501</b> &middot; TP1 <b>0.10117</b> &middot; R:R <b>1.94</b></div>
+<div class=nums>Futures: max <b>11x</b> leverage (liquidation stays beyond the stop) &middot; $100 risk = <b>$1,761</b> position, <b>$160</b> margin &middot; stop is 5.7% away</div>
+<p>Swept sell-side liquidity at 0.08643 and closed back above it, then broke structure at 0.09146. Entry at the FVG (0.09084-0.09141). 1D bias: bull. In discount.</p></div><div class=card><div class=hd><b>ADA/USDT</b> <span class=tf>1h</span>
+<span class="tag buy">BUY</span><span class=sc>score 58</span>
+<span class=st>waiting for retrace</span></div>
+<div class=nums>Price at scan <b>0.2552</b> &middot; LIMIT ORDER: only fills if price returns to the entry</div>
+<img src="charts/ADA_1h_long.png" loading=lazy>
+<div class=nums>Entry <b>0.25045</b> &middot; Stop <b>0.245272</b> &middot; TP1 <b>0.2585</b> &middot; R:R <b>1.55</b></div>
+<div class=nums>Futures: max <b>20x</b> leverage (liquidation stays beyond the stop) &middot; $100 risk = <b>$4,837</b> position, <b>$242</b> margin &middot; stop is 2.1% away</div>
+<p>Swept sell-side liquidity at 0.2462 and closed back above it, then broke structure at 0.2532. Entry at the FVG (0.2494-0.2515). 1D bias: bull. Not in ideal half of range.</p></div><div class=card><div class=hd><b>ATOM/USDT</b> <span class=tf>1h</span>
+<span class="tag sell">SELL</span><span class=sc>score 55</span>
+<span class=st>IN ZONE now</span></div>
+<div class=nums>Price at scan <b>1.7660</b> &middot; price is at/through the entry zone</div>
+<img src="charts/ATOM_1h_short.png" loading=lazy>
+<div class=nums>Entry <b>1.7810</b> &middot; Stop <b>1.8360</b> &middot; TP1 <b>1.6790</b> &middot; R:R <b>1.85</b></div>
+<div class=nums>Futures: max <b>19x</b> leverage (liquidation stays beyond the stop) &middot; $100 risk = <b>$3,237</b> position, <b>$170</b> margin &middot; stop is 3.1% away</div>
+<p>Swept buy-side liquidity at 1.8150 and closed back below it, then broke structure at 1.7730. Entry at the OB (1.7660-1.7960). 1D bias: bull. In premium.</p></div></div></details>
+<script src="live.js"></script>

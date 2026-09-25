@@ -1,0 +1,162 @@
+[
+ {
+  "key": "MUBARAK|long|1h|0.04847",
+  "zone": [
+   0.04773,
+   0.04921
+  ],
+  "ann": {
+   "lvl": 0.04206,
+   "sweep_ts": 1790334000000,
+   "ref_ts": 1790254800000,
+   "refp": 0.04906,
+   "mss_ts": 1790344800000,
+   "zone_ts": 1790341200000,
+   "kind": "FVG"
+  },
+  "symbol": "MUBARAK",
+  "side": "long",
+  "tf": "1h",
+  "score": 79,
+  "status0": "waiting for retrace",
+  "entry": 0.04847,
+  "sl": 0.04087735714285714,
+  "tp1": 0.06182,
+  "rr": 1.76,
+  "ts": 1790359200000,
+  "checked": 1790362800000,
+  "std": false,
+  "lev": 4,
+  "fee_r": 0.0064,
+  "state": "pending",
+  "added": "2026-09-25 21:48"
+ },
+ {
+  "key": "ADA|long|1h|0.25045",
+  "zone": [
+   0.2494,
+   0.2515
+  ],
+  "ann": {
+   "lvl": 0.2462,
+   "sweep_ts": 1790319600000,
+   "ref_ts": 1790298000000,
+   "refp": 0.2532,
+   "mss_ts": 1790334000000,
+   "zone_ts": 1790319600000,
+   "kind": "FVG"
+  },
+  "symbol": "ADA",
+  "side": "long",
+  "tf": "1h",
+  "score": 59,
+  "status0": "waiting for retrace",
+  "entry": 0.25045,
+  "sl": 0.24526571428571428,
+  "tp1": 0.2585,
+  "rr": 1.55,
+  "ts": 1790359200000,
+  "checked": 1790362800000,
+  "std": false,
+  "lev": 20,
+  "fee_r": 0.0483,
+  "state": "pending",
+  "added": "2026-09-25 21:48"
+ },
+ {
+  "key": "UNI|long|1h|9.5105",
+  "zone": [
+   9.41,
+   9.611
+  ],
+  "ann": {
+   "lvl": 9.058,
+   "sweep_ts": 1790319600000,
+   "ref_ts": 1790298000000,
+   "refp": 9.254,
+   "mss_ts": 1790323200000,
+   "zone_ts": 1790330400000,
+   "kind": "FVG"
+  },
+  "symbol": "UNI",
+  "side": "long",
+  "tf": "1h",
+  "score": 88,
+  "status0": "IN ZONE now",
+  "entry": 9.5105,
+  "sl": 9.004092857142856,
+  "tp1": 10.953,
+  "rr": 2.85,
+  "ts": 1790362800000,
+  "checked": 1790362800000,
+  "std": false,
+  "lev": 11,
+  "fee_r": 0.0188,
+  "state": "pending",
+  "added": "2026-09-25 22:12"
+ },
+ {
+  "key": "ZAMA|long|1h|0.091125",
+  "zone": [
+   0.09084,
+   0.09141
+  ],
+  "ann": {
+   "lvl": 0.08643,
+   "sweep_ts": 1790319600000,
+   "ref_ts": 1790305200000,
+   "refp": 0.09146,
+   "mss_ts": 1790326800000,
+   "zone_ts": 1790352000000,
+   "kind": "FVG"
+  },
+  "symbol": "ZAMA",
+  "side": "long",
+  "tf": "1h",
+  "score": 73,
+  "status0": "waiting for retrace",
+  "entry": 0.09112500000000001,
+  "sl": 0.08595007142857143,
+  "tp1": 0.10117,
+  "rr": 1.94,
+  "ts": 1790362800000,
+  "checked": 1790362800000,
+  "std": false,
+  "lev": 11,
+  "fee_r": 0.0176,
+  "state": "pending",
+  "added": "2026-09-25 22:12"
+ },
+ {
+  "key": "ATOM|short|1h|1.781",
+  "zone": [
+   1.766,
+   1.796
+  ],
+  "ann": {
+   "lvl": 1.815,
+   "sweep_ts": 1790326800000,
+   "ref_ts": 1790319600000,
+   "refp": 1.773,
+   "mss_ts": 1790352000000,
+   "zone_ts": 1790344800000,
+   "kind": "OB"
+  },
+  "symbol": "ATOM",
+  "side": "short",
+  "tf": "1h",
+  "score": 55,
+  "status0": "IN ZONE now",
+  "entry": 1.7810000000000001,
+  "sl": 1.8360178571428571,
+  "tp1": 1.679,
+  "rr": 1.85,
+  "ts": 1790362800000,
+  "checked": 1790362800000,
+  "std": false,
+  "lev": 19,
+  "fee_r": 0.0324,
+  "state": "pending",
+  "added": "2026-09-25 22:12"
+ }
+]
