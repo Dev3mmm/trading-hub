@@ -115,11 +115,13 @@ def assemble():
             open(os.path.join(PUB, p), "w", encoding="utf-8").write(fix(open(src, encoding="utf-8").read(), p))
         n += 1
     fxsrc = os.path.join(FX, "forex.html")
-    open(os.path.join(PUB, "forex.html"), "w", encoding="utf-8").write(fix(open(fxsrc, encoding="utf-8").read(), "forex.html").replace('href="hub.html"', 'href="index.html"'))
+    fxt = fix(open(fxsrc, encoding="utf-8").read(), "forex.html").replace('href="hub.html"', 'href="index.html"')
+    fxt = fxt.replace("(live bid/ask from Binance, no real orders)", "(needs the PC running: not part of this hosted copy, so no live results here)")
+    open(os.path.join(PUB, "forex.html"), "w", encoding="utf-8").write(fxt)
     hub = open(os.path.join(PUB, "hub.html"), encoding="utf-8").read()
     hub = hub.replace("not running (start run_daily.bat)", "no data yet").replace("not running (start run_forex.bat)", "no data yet")
     hub = hub.replace('<div class="mut">Everything in one place.', '<div class="mut" id="upd">Everything in one place.', 1)
-    extra = ("(async()=>{try{const S=await j('/api/status');const a=Math.round((Date.now()-S._ts)/60000);"
+    extra = ("(async()=>{$('d9').className='dot ok';try{const S=await j('/api/status');const a=Math.round((Date.now()-S._ts)/60000);"
              "$('upd').innerHTML+=` <b>Live copy: refreshed about every 10 minutes (last update ${a} min ago), works with the PC off.</b>`}catch(e){}})();\n")
     hub = hub.replace("</script></body></html>", extra + "</script></body></html>", 1)
     open(os.path.join(PUB, "hub.html"), "w", encoding="utf-8").write(hub)
