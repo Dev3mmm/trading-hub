@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="shim.js"></script><title>Trading Hub</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,Segoe UI,sans-serif;margin:0;padding:20px}
+.wrap{max-width:1100px;margin:0 auto}h1{font-size:24px;margin:0 0 4px}.mut,small{color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:18px 0}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;transition:border-color .15s}
+a.card:hover{border-color:var(--blue)}.card h2{font-size:17px;margin:0 0 4px;color:#fff}.card .d{color:var(--mut);font-size:13px;margin-bottom:10px}
+.s{font-size:13px;border-top:1px solid #21262d;padding-top:8px;min-height:38px}.up{color:var(--up)}.dn{color:var(--dn)}.warn{color:var(--warn)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#555;margin-right:6px}.dot.ok{background:var(--up)}.dot.bad{background:var(--dn)}
+.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:14px 0;font-size:14px}
+</style></head><body><div class="wrap">
+<h1>Trading Hub</h1><div class="mut" id="upd">Everything in one place. All of it is research and paper trading, nothing places real orders.</div>
+<div class="grid">
+<a class="card" href="plan.html"><h2>Trade plan: what to enter now</h2><div class="d">The STANDARD setups right now, with the exact order, why each was picked, the checklist behind it, position sizing and the backtest win rate for that setup type.</div><div class="s" id="s0">loading...</div></a>
+<a class="card" href="dashboard.html"><h2><span class="dot" id="d1"></span>Crypto setups (ICT)</h2><div class="d">4h buy setups at a support level with the daily trend up (STANDARD). Live paper trades with P/L, click-through charts, entry alerts.</div><div class="s" id="s1">loading...</div></a>
+<a class="card" href="trend.html"><h2><span class="dot" id="d2"></span>Daily trend board</h2><div class="d">Long-only trend following: 20-day breakouts, 10-day-low exits. The approach that held up best in testing. Paper account from launch.</div><div class="s" id="s2">loading...</div></a>
+<a class="card" href="bots.html"><h2><span class="dot" id="d9"></span>Trend bots: Growth vs Steady</h2><div class="d">The two bots we built and backtested over 7 years (with fees), plus live paper accounts and the orders to place at each daily open.</div><div class="s">backtest + live paper</div></a>
+<a class="card" href="scalp.html"><h2><span class="dot" id="d10"></span>Scalp book (10 paper entries)</h2><div class="d">10 limit-order entries for 1-2 hour trades, with fills, TP1, stops and profit or loss tracked live on 1-minute candles.</div><div class="s" id="s10">loading...</div></a>
+<a class="card" href="forex.html"><h2><span class="dot" id="d3"></span>Forex news board + sniper</h2><div class="d">High-impact release calendar with verdicts and long/short pairs, plus the demo sniper that paper-trades the first minute after each number.</div><div class="s" id="s3">loading...</div></a>
+<a class="card" href="research.html"><h2>Strategy research (YouTube + web)</h2><div class="d">527 recent videos and 3,358 comments read, independent large-scale backtests, session timing, and what actually works vs what is marketing.</div><div class="s">Verdict: daily trend + weekly rotation, ICT only as a small tactical slice. Scalping, ORB and mean-reversion on perps do not survive fees.</div></a>
+<a class="card" href="standard.html"><h2>Analysis standard</h2><div class="d">The written rules, and every idea we backtested with its result (what works, what does not).</div><div class="s">STANDARD v1: 4h, buys, S/R + daily trend. Read before changing anything.</div></a>
+</div>
+<div class="note"><b>Where things stand.</b> Only two things showed an edge in testing: daily long-only trend following, and 4h ICT buys at support with the trend. Sells, 1h setups, intraday TA and news-trading by hand did not. Let the paper trackers collect trades before risking real money.</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const usd=v=>(v>=0?'+$':'-$')+Math.abs(Math.round(v)).toLocaleString();const cl=v=>v>0?'up':v<0?'dn':'';
+async function j(u){const r=await fetch(u,{cache:'no-store'});return r.json()}
+(async()=>{
+ try{const p=await j('/api/plan');const n=p.plans.filter(x=>!x.status.startsWith('MOVED')).length;let fl='';try{const F=await j('/api/flip');fl=` &middot; $20 flip account: <b class="${F.equity>=F.start_equity?'up':'dn'}">$${F.equity.toFixed(2)}</b>`}catch(e){}$('s0').innerHTML=`<b>${n}</b> setup${n==1?'':'s'} meeting the standard right now &middot; backtest win rate <b>${Math.round(p.stats.all.win)}%</b>, avg <b class="up">+${p.stats.all.avg_r}R</b>${fl}`}catch(e){$('s0').textContent='starting up...'}
+ try{const d=await j('/api/live');const std=d.trades.filter(t=>t.std),op=std.filter(t=>t.state==='open'),pe=std.filter(t=>t.state==='pending'),cs=std.filter(t=>['win','loss','timeout','manual'].includes(t.state));
+  const pl=std.reduce((a,t)=>a+(['open','win','loss','timeout','manual'].includes(t.state)?(t.usd||0):0),0);
+  $('s1').innerHTML=`STANDARD: ${op.length} open, ${pe.length} waiting to fill, ${cs.length} closed &middot; P/L <b class="${cl(pl)}">${usd(pl)}</b>${d.scanning?' &middot; scanning...':''}`;$('d1').className='dot ok'}catch(e){$('s1').textContent='no data yet';$('d1').className='dot bad'}
+ try{const t=await j('/api/trend');const s=t.stats;$('s2').innerHTML=`${t.fresh.length?`<b class="up">${t.fresh.length} new breakout${t.fresh.length>1?'s':''}: ${t.fresh.map(x=>x.sym).join(', ')}</b> &middot; `:'No new breakouts &middot; '}${t.holding.length} coins in an uptrend &middot; paper equity <b>$${s.equity.toLocaleString()}</b> (${s.open} open, ${s.closed} closed)`;$('d2').className='dot ok'}catch(e){$('s2').textContent='starting up...';$('d2').className='dot bad'}
+try{const v=await j('/api/scalp');const s=v.stats;$('s10').innerHTML=`${s.filled} filled &middot; ${s.waiting} waiting &middot; ${s.wins} wins / ${s.losses} losses &middot; net <b class="${s.net_now>=0?'up':'dn'}">${s.net_now>=0?'+':'-'}$${Math.abs(s.net_now).toFixed(2)}</b>`;$('d10').className='dot ok'}catch(e){$('s10').textContent='starting up...';$('d10').className='dot bad'}
+ try{const f=await j('api/state'),sn=await j('api/sniper');const nx=f.events.filter(e=>e.T>f.now).sort((a,b)=>a.T-b.T)[0];const m=nx?Math.round((nx.T-f.now)/60000):null;
+  $('s3').innerHTML=`${nx?`Next: <b>${nx.cur} ${nx.title}</b> in ${m<90?m+' min':(m/60).toFixed(1)+' h'}`:'No upcoming high-impact releases'} &middot; sniper: ${sn.n_real} live release${sn.n_real==1?'':'s'} traded${sn.avg_latency!=null?`, number reached us ${sn.avg_latency}s after release`:''}`;$('d3').className='dot ok'}catch(e){$('s3').textContent='no data yet';$('d3').className='dot bad'}
+})();
+(async()=>{$('d9').className='dot ok';try{const S=await j('/api/status');const a=Math.round((Date.now()-S._ts)/60000);$('upd').innerHTML+=` <b>Live copy: full refresh about every 10 minutes (last ${a} min ago), forex board every 1-2 minutes around releases. Works with the PC off.</b>`}catch(e){}})();
+</script></body></html>
