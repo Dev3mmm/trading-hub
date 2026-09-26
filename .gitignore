@@ -1,3 +1,8 @@
 __pycache__/
 publish/
 *.tmp
+engine/forex/sniper_log.json
+engine/forex/sniper_ticks/
+engine/forex/sniper.out
+engine/forex/sniper.log
+engine/forex/forex_server.log

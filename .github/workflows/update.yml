@@ -1,17 +1,21 @@
 name: update
+# One long-running worker (~5.4 h) that keeps the site fresh and runs the news sniper, then relaunches itself.
+# GitHub's own cron is unreliable (it fired every 2-3 hours instead of every 10 minutes), so the cron below is only a restart safety net:
+# a run that starts while the worker is alive just queues behind it (concurrency group).
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
 concurrency:
   group: update
   cancel-in-progress: false
 permissions:
   contents: write
+  actions: write
 jobs:
-  update:
+  worker:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,24 +27,23 @@ jobs:
         run: |
           git clone --depth 1 --branch gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" publish 2>/dev/null || mkdir -p publish
           rm -rf publish/.git
-      - name: run the update
+      - name: worker loop (update every 10 min, sniper live, forex refresh near releases)
         env:
           PUBLISH_DIR: ${{ github.workspace }}/publish
-        run: python engine/run_all.py
-      - name: publish (single-commit gh-pages, no history growth)
-        run: |
-          cd publish
-          git init -q -b gh-pages
-          git config user.name "hub-bot"
-          git config user.email "hub-bot@users.noreply.github.com"
-          git add -A
-          git commit -q -m "update $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" gh-pages
+          PUSH_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          LOOP_HOURS: "5.4"
+        run: python engine/loop.py
       - name: heartbeat (keeps scheduled runs enabled)
+        if: always()
         run: |
           d=$(date -u +%Y-%m-%d)
           if [ "$(cat heartbeat.txt 2>/dev/null)" != "$d" ]; then
             echo "$d" > heartbeat.txt
             git config user.name "hub-bot"; git config user.email "hub-bot@users.noreply.github.com"
-            git add heartbeat.txt && git commit -q -m "heartbeat $d" && git push -q origin HEAD:main || true
+            git add heartbeat.txt && git commit -q -m "heartbeat $d" && git pull -q --rebase origin main && git push -q origin HEAD:main || true
           fi
+      - name: relaunch the worker
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run update.yml --repo "${{ github.repository }}" || true

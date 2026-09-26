@@ -3,7 +3,7 @@
    - /api/candles         -> Binance spot public mirror, straight from the browser
    - /api/trend_candles   -> same, daily candles
    - /api/history?key=    -> looked up in data/history.json
-   - /api/sniper_ticks    -> empty (the live sniper needs a running PC)
+   - /api/sniper_ticks    -> data/ticks/<id>.json (price path saved by the sniper running on GitHub)
    - POST /api/close      -> refused (hosted paper trades are managed by the job) */
 (function () {
   var _f = window.fetch.bind(window);
@@ -24,7 +24,10 @@
     if (name === 'candles') return kl(q.get('symbol'), q.get('tf'), +q.get('from'), 500);
     if (name === 'trend_candles') return kl(q.get('symbol'), '1d', 0, 170);
     if (name === 'close') return json({ ok: false, hosted: true });
-    if (name === 'sniper_ticks') return json([]);
+    if (name === 'sniper_ticks') {
+      return _f('data/ticks/' + encodeURIComponent((q.get('id') || '').replace('/', '')) + '.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (t) { return json(t.filter(function (x) { return x[1] === q.get('inst'); })); }).catch(function () { return json([]); });
+    }
     if (name === 'history') {
       return _f('data/history.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (h) { return json(h[q.get('key')] || {}); });
     }
