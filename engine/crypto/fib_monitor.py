@@ -18,6 +18,7 @@ CHART_DIR = os.path.join(OUT, 'charts', 'fib')
 LOG = os.path.join(OUT, 'fib_signals.json')
 N_PIV = 15
 HORIZON_HOURS = 8
+MAX_STALE_BARS = 40  # ~10h on 15m -- touch must happen reasonably soon after the swing forms, not off old, chopped-through structure
 MAX_LOG = 300  # keep the site light
 
 
@@ -206,6 +207,7 @@ def run():
             else:
                 already_invalid = bool((h[start:i + 1] >= leg['stop']).any())
             if already_invalid: continue
+            if i - max(leg['h_bar'], leg['l_bar']) > MAX_STALE_BARS: continue  # swing is too old -- a real trader would've redrawn it
             touch_now = l[i] <= leg['zone_hi'] and h[i] >= leg['zone_lo']
             touch_prev = l[prev] <= leg['zone_hi'] and h[prev] >= leg['zone_lo']
             if not touch_now or touch_prev: continue
