@@ -10,8 +10,9 @@ import requests, numpy as np, pandas as pd
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import datasrc  # local PC: Binance USDT-M futures; hosted (GitHub Actions): Binance spot mirror (futures API 451s from US cloud IPs)
 
-BASE = 'https://fapi.binance.com'
+BASE = datasrc.API  # e.g. ".../fapi/v1" locally, ".../api/v3" hosted -- same kline/ticker shape either way
 OUT = os.path.dirname(os.path.abspath(__file__))
 CHART_DIR = os.path.join(OUT, 'charts', 'fib')
 LOG = os.path.join(OUT, 'fib_signals.json')
@@ -30,7 +31,7 @@ def get(path, params=None):
 
 
 def klines(sym, interval, limit):
-    raw = get('/fapi/v1/klines', {'symbol': sym, 'interval': interval, 'limit': limit})
+    raw = get('/klines', {'symbol': sym, 'interval': interval, 'limit': limit})
     if not isinstance(raw, list):
         raise RuntimeError(str(raw)[:150])
     raw = raw[:-1]
@@ -168,10 +169,13 @@ def check_outcomes(rows):
 
 def run():
     os.makedirs(CHART_DIR, exist_ok=True)
-    tickers = get('/fapi/v1/ticker/24hr')
-    ex = get('/fapi/v1/exchangeInfo')
-    ok = {s['symbol'] for s in ex['symbols'] if s.get('contractType') == 'PERPETUAL' and s.get('status') == 'TRADING'
-          and s.get('quoteAsset') == 'USDT' and s['symbol'].isalnum()}
+    tickers = get('/ticker/24hr') or []
+    if datasrc.HOSTED:
+        ok = {t['symbol'] for t in tickers if t['symbol'].endswith('USDT') and t['symbol'].isalnum()}
+    else:
+        ex = get('/exchangeInfo')
+        ok = {s['symbol'] for s in ex['symbols'] if s.get('contractType') == 'PERPETUAL' and s.get('status') == 'TRADING'
+              and s.get('quoteAsset') == 'USDT' and s['symbol'].isalnum()}
     tickers = [t for t in tickers if t['symbol'] in ok]
     tickers.sort(key=lambda t: -float(t['quoteVolume']))
     tickers = tickers[:50]  # a bit lighter than the local version, this runs on a shared cloud schedule
