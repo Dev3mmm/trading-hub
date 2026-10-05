@@ -27,6 +27,7 @@ def build(dst):
     step("scalp", scalp_book.view)
     step("bots", lambda: json.load(open(os.path.join(OUT, "bots_state.json"))))
     step("trend", lambda: json.load(open(os.path.join(OUT, "trend_state.json"))))
+    step("fib", lambda: json.load(open(os.path.join(OUT, "fib_signals.json"))))
     def feed():
         keys = {t["key"] for t in tracker.load() if t.get("std")}
         return [x for x in reversed(tracker.feed_load()) if x["key"] in keys or x.get("std")][:40]

@@ -12,9 +12,9 @@ os.chdir(CRY)
 FAST = "--fast" in sys.argv
 
 STATE_CRY = ["trades.json", "feed.json", "flip_cfg.json", "setups.json", "trend_state.json", "trend_log.json", "bots_state.json", "scalp_book.json", "scalp_book.json.bak",
-             "hosted_meta.json", "dashboard.html", "setups.pine", "watchlist_tradingview.txt"]
+             "hosted_meta.json", "dashboard.html", "setups.pine", "watchlist_tradingview.txt", "fib_signals.json"]
 STATE_FX = ["forex_trades.json", "sniper_log.json"]
-PAGES = ["hub.html", "plan.html", "trend.html", "bots.html", "scalp.html", "research.html", "standard.html", "dashboard.html", "live.js", "bots_results.json"]
+PAGES = ["hub.html", "plan.html", "trend.html", "bots.html", "scalp.html", "research.html", "standard.html", "dashboard.html", "live.js", "bots_results.json", "fib.html"]
 SCAN_EVERY, SLOW_EVERY = 25 * 60, 25 * 60
 report = {}
 t_start = time.time()
@@ -78,9 +78,10 @@ def main():
             step("scanner", lambda: scanner.main() or "scanned")
             m["last_scan"] = now
         if now - m.get("last_slow", 0) > SLOW_EVERY:
-            import trend_scan, bots_live
+            import trend_scan, bots_live, fib_monitor
             step("trend_scan", lambda: trend_scan.run() and "ok")
             step("bots_live", lambda: bots_live.run() and "ok")
+            step("fib_monitor", lambda: fib_monitor.run())
             m["last_slow"] = now
         save_meta(m)
         import build_static
