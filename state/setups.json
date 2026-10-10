@@ -1,0 +1,222 @@
+[
+ {
+  "symbol": "LTC",
+  "tf": "1h",
+  "side": "long",
+  "score": 75,
+  "rr": 1.6,
+  "status": "waiting for retrace",
+  "entry": 63.980000000000004,
+  "sl": 63.37339285714286,
+  "tp1": 64.95,
+  "tp2": 67.87,
+  "chart": "LTC_1h_long.png",
+  "why": "Swept sell-side liquidity at 63.4400 and closed back above it, then broke structure at 64.0200. Entry at the FVG (63.9500-64.0100). 1D bias: bull. In discount.",
+  "price": 64.22,
+  "sd": 0.009481199481980984,
+  "lev": 20,
+  "notional": 10547.188695908146,
+  "margin": 527.3594347954073,
+  "fee_r": 0.10547188695908145,
+  "ts": 1791651600000,
+  "ann": {
+   "lvl": 63.44,
+   "sweep_ts": 1791619200000,
+   "ref_ts": 1791612000000,
+   "refp": 64.02,
+   "mss_ts": 1791640800000,
+   "zone_ts": 1791637200000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 2,
+  "htf_d": false,
+  "zone": [
+   63.95,
+   64.01
+  ],
+  "daily": {
+   "close": 63.47,
+   "ema50": 59.927812332530976,
+   "ema50_prev": 56.58276890903575
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "MUBARAK",
+  "tf": "1h",
+  "side": "short",
+  "score": 60,
+  "rr": 1.59,
+  "status": "IN ZONE now",
+  "entry": 0.07554,
+  "sl": 0.07756310714285715,
+  "tp1": 0.07232,
+  "tp2": 0.07024,
+  "chart": "MUBARAK_1h_short.png",
+  "why": "Swept buy-side liquidity at 0.07735 and closed back below it, then broke structure at 0.0751. Entry at the FVG (0.07518-0.0759). 1D bias: bull. In premium.",
+  "price": 0.0754,
+  "sd": 0.026781931994402344,
+  "lev": 20,
+  "notional": 3733.8605751407654,
+  "margin": 186.69302875703826,
+  "fee_r": 0.037338605751407655,
+  "ts": 1791651600000,
+  "ann": {
+   "lvl": 0.07735,
+   "sweep_ts": 1791612000000,
+   "ref_ts": 1791601200000,
+   "refp": 0.0751,
+   "mss_ts": 1791640800000,
+   "zone_ts": 1791637200000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 7,
+  "htf_d": true,
+  "zone": [
+   0.07518,
+   0.0759
+  ],
+  "daily": {
+   "close": 0.07589,
+   "ema50": 0.04578060988334625,
+   "ema50_prev": 0.03505232047761825
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "WLFI",
+  "tf": "4h",
+  "side": "long",
+  "score": 59,
+  "rr": 1.65,
+  "status": "waiting for retrace",
+  "entry": 0.05625,
+  "sl": 0.05312107142857143,
+  "tp1": 0.0614,
+  "tp2": 0.0614,
+  "chart": "WLFI_4h_long.png",
+  "why": "Swept sell-side liquidity at 0.0538 and closed back above it, then broke structure at 0.0561. Entry at the FVG (0.0557-0.0568). 1D bias: range. In discount.",
+  "price": 0.057,
+  "sd": 0.05562539682539687,
+  "lev": 11,
+  "notional": 1797.7399840200876,
+  "margin": 163.43090763818978,
+  "fee_r": 0.017977399840200876,
+  "ts": 1791648000000,
+  "ann": {
+   "lvl": 0.0538,
+   "sweep_ts": 1791475200000,
+   "ref_ts": 1791460800000,
+   "refp": 0.0561,
+   "mss_ts": 1791576000000,
+   "zone_ts": 1791561600000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 5,
+  "htf_d": true,
+  "zone": [
+   0.0557,
+   0.0568
+  ],
+  "daily": {
+   "close": 0.0571,
+   "ema50": 0.056754059063098335,
+   "ema50_prev": 0.05726925330276485
+  },
+  "bias": "range",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "PIXEL",
+  "tf": "4h",
+  "side": "short",
+  "score": 52,
+  "rr": 1.5,
+  "status": "waiting for retrace",
+  "entry": 0.006895,
+  "sl": 0.008494642857142859,
+  "tp1": 0.00449,
+  "tp2": 0.00449,
+  "chart": "PIXEL_4h_short.png",
+  "why": "Swept buy-side liquidity at 0.00597 and closed back below it, then broke structure at 0.00569. Entry at the FVG (0.00678-0.00701). 1D bias: bull. In premium.",
+  "price": 0.00652,
+  "sd": 0.23200041437894975,
+  "lev": 2,
+  "notional": 431.03371288233944,
+  "margin": 215.51685644116972,
+  "fee_r": 0.004310337128823395,
+  "ts": 1791648000000,
+  "ann": {
+   "lvl": 0.00597,
+   "sweep_ts": 1791446400000,
+   "ref_ts": 1791374400000,
+   "refp": 0.00569,
+   "mss_ts": 1791460800000,
+   "zone_ts": 1791590400000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 9,
+  "htf_d": true,
+  "zone": [
+   0.00678,
+   0.00701
+  ],
+  "daily": {
+   "close": 0.00709,
+   "ema50": 0.0055003538236546405,
+   "ema50_prev": 0.005196200683318927
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "QNT",
+  "tf": "1h",
+  "side": "short",
+  "score": 50,
+  "rr": 2.34,
+  "status": "waiting for retrace",
+  "entry": 246.34,
+  "sl": 255.6302142857143,
+  "tp1": 224.61,
+  "tp2": 220.63,
+  "chart": "QNT_1h_short.png",
+  "why": "Swept buy-side liquidity at 251.00 and closed back below it, then broke structure at 244.38. Entry at the FVG (246.16-246.52). 1D bias: bull. In premium.",
+  "price": 242.9,
+  "sd": 0.03771297509829619,
+  "lev": 16,
+  "notional": 2651.607298001738,
+  "margin": 165.72545612510862,
+  "fee_r": 0.02651607298001738,
+  "ts": 1791651600000,
+  "ann": {
+   "lvl": 251.0,
+   "sweep_ts": 1791619200000,
+   "ref_ts": 1791615600000,
+   "refp": 244.38,
+   "mss_ts": 1791648000000,
+   "zone_ts": 1791640800000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 6,
+  "htf_d": false,
+  "zone": [
+   246.16,
+   246.52
+  ],
+  "daily": {
+   "close": 248.28,
+   "ema50": 145.3079619968679,
+   "ema50_prev": 99.06341490729675
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ }
+]

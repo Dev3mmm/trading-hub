@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="shim.js"></script><title>Daily Trend Board</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,sans-serif;margin:0;padding:16px}
+.wrap{max-width:1200px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}small,.mut,.tag{color:var(--mut)}.tag{font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0}
+.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:10px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.stat{background:#0e1116;border:1px solid var(--line);border-radius:6px;padding:8px 10px}.stat b{font-size:18px}
+table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}td{padding:6px 8px;border-bottom:1px solid #21262d}
+tr.c{cursor:pointer}tr.c:hover{background:#1c2330}.up{color:var(--up)}.dn{color:var(--dn)}.warn{color:var(--warn)}
+.badge{display:inline-block;border-radius:4px;padding:1px 7px;font-weight:700;font-size:12px}.b-buy{background:#1b4332;color:var(--up)}.b-exit{background:#4a1d1d;color:var(--dn)}.b-w{background:#3d3200;color:var(--warn)}
+#cv{width:100%;height:340px;display:block;border:1px solid var(--line);border-radius:6px}a{color:var(--blue)}button{background:#21262d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:3px 10px;cursor:pointer}
+</style></head><body><div class="wrap">
+<h1>Daily Trend Board <small id="ts"></small> &nbsp;<a href="hub.html">&larr; hub</a></h1>
+<div class="mut">Long-only trend following: buy at the next daily open after a close above the 20-day high, exit at the next open after a close below the 10-day low.</div>
+<div class="note"><b>Read this first.</b> This is the one approach that held up in testing (about +26% a year in the backtest, but with a -20% worst drawdown, about 1 in 5 twelve-month windows losing, and results flattered by using today's surviving coins). Only about 4 in 10 trades win: a few big winners pay for many small losses. Sizing rule: risk 0.5% of the account per trade (entry to the 10-day low), never more than 20% of the account in one coin, at most 10 open positions. It scans every 30 minutes, but signals only change at the daily close (00:00 UTC = 03:00 your time). Not financial advice. Paper account below starts from today.</div>
+<div class="card"><h2>Two ways to run it (same trades, tested on 4 years)</h2><table><tr><th>Profile</th><th>How</th><th>Win rate</th><th>Return / yr</th><th>Max drawdown</th></tr>
+<tr><td><b>Growth</b></td><td>Hold the whole position until price closes below the 10-day low</td><td>40%</td><td class="up">+23%</td><td class="dn">-22%</td></tr>
+<tr><td><b>Steady</b></td><td>Sell half at +1R (the "Half-profit level" column), move the stop on the rest to your entry, then exit on the 10-day low</td><td>50%</td><td class="up">+14%</td><td class="dn">-13%</td></tr></table>
+<div class="tag">Taking profits early raises the win rate but lowers the return by about the same proportion as the drawdown, so neither profile is better in risk-adjusted terms. Pick the one you can stick with.</div></div>
+<div class="card"><h2>Paper account <small>($10,000 start, forward from launch)</small></h2><div class="stats" id="stats"></div></div>
+<div class="card"><h2>Today's signals</h2><div id="sig"></div></div>
+<div class="card"><h2>Open paper positions</h2><div id="po"></div></div>
+<div class="card"><h2>Already in an uptrend when the scanner started <small>(entered on the dates shown; not counted in the paper account)</small></h2><div id="hold"></div></div>
+<div class="card"><h2>Watchlist: within 3% of a breakout</h2><div id="watch"></div></div>
+<div class="card"><h2>Closed paper trades</h2><div id="pc"></div></div>
+<div class="card" id="chartbox" style="display:none"><h2 id="ctitle"></h2><canvas id="cv"></canvas><div class="tag">Daily candles. Blue = 20-day high (breakout level), red = 10-day low (exit level), yellow = entry.</div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let S=null;
+const f=v=>v==null?'':(v<1?(+v).toPrecision(4):(+v).toLocaleString(undefined,{maximumFractionDigits:v<100?3:1}));
+const usd=v=>(v>=0?'+$':'-$')+Math.abs(v).toFixed(2);const cls=v=>v>0?'up':v<0?'dn':'';
+const d=ms=>new Date(ms).toLocaleDateString([],{day:'2-digit',month:'short'});
+function tbl(head,rows){return rows.length?`<table><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.join('')}</table>`:'<div class="mut">None.</div>'}
+function render(){if(!S)return;$('ts').textContent='updated '+new Date(S.ts).toLocaleTimeString();const st=S.stats;
+ $('stats').innerHTML=[['Equity',`$${st.equity.toLocaleString()}`,''],['Realized',usd(st.realized),cls(st.realized)],['Open P/L',usd(st.unrealized),cls(st.unrealized)],['Open positions',st.open+' / '+S.rules.maxpos,''],['Closed trades',st.closed+(st.closed?` (${st.wins} wins)`:''),''],['Average R',st.avg_r==null?'-':st.avg_r,'']].map(([a,b,c])=>`<div class="stat"><div class="tag">${a}</div><b class="${c}">${b}</b></div>`).join('');
+ const row=(r,extra)=>`<tr class="c" data-s="${r.sym||r.sym}" data-e="${r.entry||''}"><td><b>${r.sym}</b></td>${extra}</tr>`;
+ $('sig').innerHTML=(S.fresh.length?'<div style="margin-bottom:6px"><span class="badge b-buy">BUY at today\'s open</span></div>'+tbl(['Coin','Price','Broke 20d high','Stop (10d low)','Risk','Take half profit at (+1R)','Suggested size for $10k paper acct','Risk $'],S.fresh.map(r=>row(r,`<td>${f(r.price)}</td><td>${f(r.high20)}</td><td class="dn">${f(r.stop0)}</td><td>${(100*r.rf0).toFixed(1)}%</td><td class="up">${f(r.price+(r.price-r.stop0))}</td><td>$${r.suggest_notional}</td><td>$${r.suggest_risk}</td>`))):'<div class="mut">No new breakouts at the last daily close.</div>')+
+  (S.exits.length?'<div style="margin:10px 0 6px"><span class="badge b-exit">EXIT at today\'s open</span> <span class="tag">closed below the 10-day low</span></div>'+tbl(['Coin','Price','10d low broken'],S.exits.map(r=>row(r,`<td>${f(r.price)}</td><td class="dn">${f(r.low10)}</td>`))):'');
+ $('po').innerHTML=tbl(['Coin','Entered','Entry','Price','Exit level (10d low)','Half-profit level (+1R)','Size','R now','P/L'],S.paper_open.map(t=>row(t,`<td>${d(t.entry_ts)}</td><td>${f(t.entry)}</td><td>${f(t.price)}</td><td class="dn">${f(t.stop_now)}</td><td class="up">${f(t.entry+(t.entry-t.stop0))}</td><td>$${Math.round(t.notional)}</td><td class="${cls(t.r_now)}">${t.r_now}R</td><td class="${cls(t.unreal)}">${usd(t.unreal)}</td>`)));
+ $('hold').innerHTML=tbl(['Coin','Entered','Days','Entry','Price','Exit level (10d low)','Half-profit level (+1R)','Distance to exit','P/L'],S.holding.sort((a,b)=>a.days-b.days).map(r=>row(r,`<td>${d(r.entry_ts)}</td><td>${r.days}</td><td>${f(r.entry)}</td><td>${f(r.price)}</td><td class="dn">${f(r.low10)}</td><td class="up">${f(r.entry+(r.entry-r.stop0))}</td><td>${(100*(1-r.low10/r.price)).toFixed(0)}%</td><td class="${cls(r.pnl_pct)}">${r.pnl_pct>0?'+':''}${r.pnl_pct}%</td>`)));
+ $('watch').innerHTML=tbl(['Coin','Price','20d high','Needs','10d low'],S.watch.map(r=>row(r,`<td>${f(r.price)}</td><td>${f(r.high20)}</td><td class="warn">+${r.to_break_pct}%</td><td class="dn">${f(r.low10)}</td>`)));
+ $('pc').innerHTML=tbl(['Coin','Entered','Exited','Entry','Exit','R','P/L'],S.paper_closed.map(t=>row(t,`<td>${d(t.entry_ts)}</td><td>${d(t.exit_ts)}</td><td>${f(t.entry)}</td><td>${f(t.exit)}</td><td class="${cls(t.r)}">${t.r}R</td><td class="${cls(t.pnl)}">${usd(t.pnl)}</td>`)));
+}
+document.addEventListener('click',async e=>{const r=e.target.closest('tr.c');if(!r)return;const sym=r.dataset.s,entry=+r.dataset.e||null;
+ const c=await (await fetch('api/trend_candles?symbol='+sym)).json();$('chartbox').style.display='block';$('ctitle').textContent=sym+'/USDT daily';draw(c,entry);$('chartbox').scrollIntoView({behavior:'smooth',block:'nearest'})});
+function draw(c,entry){const cv=$('cv'),W=cv.clientWidth,H=340,dp=window.devicePixelRatio||1;cv.width=W*dp;cv.height=H*dp;const g=cv.getContext('2d');g.scale(dp,dp);g.fillStyle='#0e1116';g.fillRect(0,0,W,H);
+ const L=8,R=70,T=10,B=22,n=c.length;let lo=1e99,hi=-1e99;c.forEach(k=>{lo=Math.min(lo,k[3]);hi=Math.max(hi,k[2])});const pad=(hi-lo)*.05;lo-=pad;hi+=pad;
+ const X=i=>L+(i+.5)*(W-L-R)/(n+1),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+ g.strokeStyle='#21262d';g.fillStyle='#8b949e';g.font='11px system-ui';for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4;g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-R,Y(v));g.stroke();g.fillText(f(+v.toPrecision(4)),W-R+4,Y(v)+4)}
+ const hh=[],xl=[];for(let i=0;i<n;i++){hh.push(i>=20?Math.max(...c.slice(i-20,i).map(k=>k[2])):null);xl.push(i>=10?Math.min(...c.slice(i-10,i).map(k=>k[3])):null)}
+ const line=(a,col)=>{g.strokeStyle=col;g.lineWidth=1.3;g.beginPath();let s=false;a.forEach((v,i)=>{if(v==null)return;s?g.lineTo(X(i),Y(v)):(g.moveTo(X(i),Y(v)),s=true)});g.stroke()};line(hh,'#58a6ff');line(xl,'#f85149');
+ c.forEach((k,i)=>{const up=k[4]>=k[1],col=up?'#26a69a':'#ef5350';g.strokeStyle=g.fillStyle=col;g.lineWidth=1;g.beginPath();g.moveTo(X(i),Y(k[2]));g.lineTo(X(i),Y(k[3]));g.stroke();g.fillRect(X(i)-2.5,Math.min(Y(k[1]),Y(k[4])),5,Math.max(1,Math.abs(Y(k[1])-Y(k[4]))))});
+ if(entry){g.strokeStyle='#f0b90b';g.setLineDash([5,4]);g.beginPath();g.moveTo(L,Y(entry));g.lineTo(W-R,Y(entry));g.stroke();g.setLineDash([]);g.fillStyle='#f0b90b';g.fillText('entry '+f(entry),W-R+4,Y(entry)-3)}
+ g.fillStyle='#8b949e';for(let i=0;i<n;i+=Math.ceil(n/6))g.fillText(new Date(c[i][0]).toLocaleDateString([],{day:'2-digit',month:'short'}),X(i)-14,H-6)}
+async function tick(){try{S=await (await fetch('api/trend')).json();if(!S.error)render()}catch(e){}}
+tick();setInterval(tick,60000);
+</script></body></html>

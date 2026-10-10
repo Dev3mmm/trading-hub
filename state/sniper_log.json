@@ -1,0 +1,377 @@
+[
+ {
+  "id": "400660",
+  "event": "EU Economic Sentiment",
+  "cur": "EUR",
+  "T": 1790672400000,
+  "forecast": 99,
+  "previous": 98.4,
+  "actual": 97.9,
+  "detected_s": 7.3,
+  "test": false,
+  "trades": [
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 0,
+    "entry_after_release_s": 7.4,
+    "entry": 1.1349,
+    "exits": {
+     "30": -0.88,
+     "60": -0.88,
+     "180": -0.88,
+     "300": -0.88
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 2,
+    "entry_after_release_s": 9.4,
+    "entry": 1.1349,
+    "exits": {
+     "30": -0.88,
+     "60": -0.88,
+     "180": -0.88,
+     "300": -0.88
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 5,
+    "entry_after_release_s": 12.4,
+    "entry": 1.1349,
+    "exits": {
+     "30": -0.88,
+     "60": -0.88,
+     "180": -0.88,
+     "300": -0.88
+    }
+   }
+  ],
+  "others": [],
+  "verdict": "negative",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": 0.0,
+    "15": 0.0,
+    "30": 0.0,
+    "60": 0.0,
+    "180": 0.0,
+    "300": 0.0
+   }
+  }
+ },
+ {
+  "id": "398485",
+  "event": "US JOLTs Job Openings",
+  "cur": "USD",
+  "T": 1790690400000,
+  "forecast": 7.23,
+  "previous": 7.335,
+  "actual": 7.079,
+  "detected_s": 7.8,
+  "test": false,
+  "trades": [
+   {
+    "inst": "EURUSDT",
+    "side": "long",
+    "entry_delay_s": 0,
+    "entry_after_release_s": 7.9,
+    "entry": 1.1347,
+    "exits": {
+     "30": -2.64,
+     "60": -2.64,
+     "180": -4.41,
+     "300": -0.88
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "long",
+    "entry_delay_s": 2,
+    "entry_after_release_s": 9.9,
+    "entry": 1.1346,
+    "exits": {
+     "30": -1.76,
+     "60": -1.76,
+     "180": -3.53,
+     "300": 0.0
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "long",
+    "entry_delay_s": 5,
+    "entry_after_release_s": 12.9,
+    "entry": 1.1346,
+    "exits": {
+     "30": -1.76,
+     "60": -1.76,
+     "180": -3.53,
+     "300": 0.0
+    }
+   }
+  ],
+  "others": [
+   {
+    "event": "US CB Consumer Confidence",
+    "forecast": 89.2,
+    "actual": 81.9,
+    "verdict": "negative"
+   }
+  ],
+  "verdict": "negative",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": 2.64,
+    "15": 2.64,
+    "30": 0.88,
+    "60": 0.88,
+    "180": -0.88,
+    "300": 2.64
+   }
+  }
+ },
+ {
+  "id": "397000",
+  "event": "US ADP Employment Change",
+  "cur": "USD",
+  "T": 1790770500000,
+  "forecast": 70,
+  "previous": 38,
+  "actual": 90,
+  "detected_s": 2.9,
+  "test": false,
+  "trades": [
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 0,
+    "entry_after_release_s": 3.2,
+    "entry": 1.1367,
+    "exits": {
+     "30": -0.0,
+     "60": 0.88,
+     "180": -0.88,
+     "300": -1.76
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 2,
+    "entry_after_release_s": 5.2,
+    "entry": 1.1367,
+    "exits": {
+     "30": -0.0,
+     "60": 0.88,
+     "180": -0.88,
+     "300": -1.76
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 5,
+    "entry_after_release_s": 8.2,
+    "entry": 1.1367,
+    "exits": {
+     "30": -0.0,
+     "60": 0.88,
+     "180": -0.88,
+     "300": -1.76
+    }
+   }
+  ],
+  "others": [],
+  "verdict": "positive",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": 0.0,
+    "15": -0.88,
+    "30": -0.88,
+    "60": -1.76,
+    "180": 0.0,
+    "300": 0.88
+   }
+  }
+ },
+ {
+  "id": "402198",
+  "event": "EU Unemployment Rate",
+  "cur": "EUR",
+  "T": 1790845200000,
+  "forecast": 6.4,
+  "previous": 6.4,
+  "actual": 6.4,
+  "detected_s": 5.2,
+  "test": false,
+  "trades": [],
+  "others": [],
+  "verdict": "in line",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": 0.0,
+    "15": -1.77,
+    "30": -1.77,
+    "60": -2.21,
+    "180": 0.0,
+    "300": 1.77
+   }
+  }
+ },
+ {
+  "id": "398440",
+  "event": "US Factory Orders MoM",
+  "cur": "USD",
+  "T": 1790949600000,
+  "forecast": 0.1,
+  "previous": 0.8,
+  "actual": 0.1,
+  "detected_s": 5.3,
+  "test": false,
+  "trades": [],
+  "others": [],
+  "verdict": "in line",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": -0.44,
+    "15": -0.89,
+    "30": -1.77,
+    "60": -1.77,
+    "180": 0.0,
+    "300": 4.43
+   }
+  }
+ },
+ {
+  "id": "403052",
+  "event": "EU Retail Sales MoM",
+  "cur": "EUR",
+  "T": 1791277200000,
+  "forecast": 0.2,
+  "previous": -0.6,
+  "actual": 0.1,
+  "detected_s": 8.9,
+  "test": false,
+  "trades": [
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 0,
+    "entry_after_release_s": 9.0,
+    "entry": 1.1243,
+    "exits": {
+     "30": -1.78,
+     "60": -3.56,
+     "180": -3.56,
+     "300": -2.67
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 2,
+    "entry_after_release_s": 11.0,
+    "entry": 1.1243,
+    "exits": {
+     "30": -1.78,
+     "60": -3.56,
+     "180": -3.56,
+     "300": -2.67
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "short",
+    "entry_delay_s": 5,
+    "entry_after_release_s": 14.0,
+    "entry": 1.1243,
+    "exits": {
+     "30": -1.78,
+     "60": -3.56,
+     "180": -3.56,
+     "300": -2.67
+    }
+   }
+  ],
+  "others": [],
+  "verdict": "negative",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": 0.0,
+    "15": 0.0,
+    "30": 0.89,
+    "60": 2.67,
+    "180": 2.22,
+    "300": 1.33
+   }
+  }
+ },
+ {
+  "id": "398429",
+  "event": "US Balance of Trade",
+  "cur": "USD",
+  "T": 1791289800000,
+  "forecast": -102,
+  "previous": -88.6,
+  "actual": -105.6,
+  "detected_s": 3.9,
+  "test": false,
+  "trades": [
+   {
+    "inst": "EURUSDT",
+    "side": "long",
+    "entry_delay_s": 0,
+    "entry_after_release_s": 4.0,
+    "entry": 1.1264,
+    "exits": {
+     "30": -0.89,
+     "60": -0.89,
+     "180": -1.78,
+     "300": -2.66
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "long",
+    "entry_delay_s": 2,
+    "entry_after_release_s": 6.0,
+    "entry": 1.1264,
+    "exits": {
+     "30": -0.89,
+     "60": -0.89,
+     "180": -1.78,
+     "300": -2.66
+    }
+   },
+   {
+    "inst": "EURUSDT",
+    "side": "long",
+    "entry_delay_s": 5,
+    "entry_after_release_s": 9.0,
+    "entry": 1.1264,
+    "exits": {
+     "30": -0.89,
+     "60": -0.89,
+     "180": -1.78,
+     "300": -2.66
+    }
+   }
+  ],
+  "others": [],
+  "verdict": "negative",
+  "mid_move_bp": {
+   "EURUSDT": {
+    "5": 0.44,
+    "15": 0.44,
+    "30": 0.44,
+    "60": 0.44,
+    "180": -0.44,
+    "300": -1.33
+   }
+  }
+ }
+]

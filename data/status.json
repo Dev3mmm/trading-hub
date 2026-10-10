@@ -1,0 +1,75 @@
+{
+ "restore": {
+  "ok": true,
+  "secs": 0.1,
+  "info": null
+ },
+ "scalp_book": {
+  "ok": true,
+  "secs": 0.6,
+  "info": "updated"
+ },
+ "tracker_refresh": {
+  "ok": true,
+  "secs": 15.3,
+  "info": "updated"
+ },
+ "scanner": {
+  "ok": true,
+  "secs": 50.4,
+  "info": "scanned"
+ },
+ "trend_scan": {
+  "ok": true,
+  "secs": 32.3,
+  "info": "ok"
+ },
+ "bots_live": {
+  "ok": true,
+  "secs": 34.4,
+  "info": "ok"
+ },
+ "fib_monitor": {
+  "ok": true,
+  "secs": 41.8,
+  "info": {
+   "new_signals": 1,
+   "open": 2,
+   "resolved": 156,
+   "reached_target": 85,
+   "invalidated": 52,
+   "timed_out": 19
+  }
+ },
+ "build_static": {
+  "ok": true,
+  "secs": 0.6,
+  "info": {
+   "live": "ok",
+   "plan": "ok",
+   "flip": "ok",
+   "scalp": "ok",
+   "bots": "ok",
+   "trend": "ok",
+   "fib": "ok",
+   "feed": "ok"
+  }
+ },
+ "forex": {
+  "ok": true,
+  "secs": 6.0,
+  "info": {
+   "calendar": "ok (20 events)",
+   "bars": "8/8 pairs",
+   "state": "ok"
+  }
+ },
+ "assemble": {
+  "ok": true,
+  "secs": 0.1,
+  "info": "11 pages"
+ },
+ "_total_secs": 182.4,
+ "_ts": 1791654314351,
+ "_fast_ts": 1791654437371
+}
