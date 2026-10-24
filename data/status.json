@@ -1,0 +1,48 @@
+{
+ "restore": {
+  "ok": true,
+  "secs": 0.3,
+  "info": null
+ },
+ "scalp_book": {
+  "ok": true,
+  "secs": 1.0,
+  "info": "updated"
+ },
+ "tracker_refresh": {
+  "ok": true,
+  "secs": 22.2,
+  "info": "updated"
+ },
+ "build_static": {
+  "ok": true,
+  "secs": 0.9,
+  "info": {
+   "live": "ok",
+   "plan": "ok",
+   "flip": "ok",
+   "scalp": "ok",
+   "bots": "ok",
+   "trend": "ok",
+   "fib": "ok",
+   "feed": "ok"
+  }
+ },
+ "forex": {
+  "ok": true,
+  "secs": 5.6,
+  "info": {
+   "calendar": "ok (27 events)",
+   "bars": "8/8 pairs",
+   "state": "ok"
+  }
+ },
+ "assemble": {
+  "ok": true,
+  "secs": 0.2,
+  "info": "11 pages"
+ },
+ "_total_secs": 30.5,
+ "_ts": 1792867909324,
+ "_fast_ts": 1792868403782
+}

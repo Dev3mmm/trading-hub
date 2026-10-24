@@ -1,0 +1,178 @@
+[
+ {
+  "symbol": "ZRO",
+  "tf": "1h",
+  "side": "long",
+  "score": 80,
+  "rr": 1.62,
+  "status": "waiting for retrace",
+  "entry": 1.7075,
+  "sl": 1.6348107142857142,
+  "tp1": 1.825,
+  "tp2": 2.139,
+  "chart": "ZRO_1h_long.png",
+  "why": "Swept sell-side liquidity at 1.6610 and closed back above it, then broke structure at 1.7150. Entry at the FVG (1.6980-1.7170). 1D bias: bull. In discount.",
+  "price": 1.73,
+  "sd": 0.04257059192637528,
+  "lev": 14,
+  "notional": 2349.039453643195,
+  "margin": 167.78853240308536,
+  "fee_r": 0.023490394536431952,
+  "ts": 1792864800000,
+  "ann": {
+   "lvl": 1.661,
+   "sweep_ts": 1792850400000,
+   "ref_ts": 1792825200000,
+   "refp": 1.715,
+   "mss_ts": 1792857600000,
+   "zone_ts": 1792854000000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 1,
+  "htf_d": true,
+  "zone": [
+   1.698,
+   1.717
+  ],
+  "daily": {
+   "close": 1.706,
+   "ema50": 1.6522198106009804,
+   "ema50_prev": 1.5414292465757284
+  },
+  "bias": "bull",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "KAT",
+  "tf": "4h",
+  "side": "long",
+  "score": 64,
+  "rr": 1.63,
+  "status": "IN ZONE now",
+  "entry": 0.004345,
+  "sl": 0.0038278214285714287,
+  "tp1": 0.00519,
+  "tp2": 0.00636,
+  "chart": "KAT_4h_long.png",
+  "why": "Swept sell-side liquidity at 0.00389 and closed back above it, then broke structure at 0.00419. Entry at the FVG (0.0042-0.00449). 1D bias: bear. In discount.",
+  "price": 0.00433,
+  "sd": 0.11902843991451581,
+  "lev": 5,
+  "notional": 840.1353497686628,
+  "margin": 168.02706995373256,
+  "fee_r": 0.008401353497686628,
+  "ts": 1792857600000,
+  "ann": {
+   "lvl": 0.00389,
+   "sweep_ts": 1792670400000,
+   "ref_ts": 1792598400000,
+   "refp": 0.00419,
+   "mss_ts": 1792800000000,
+   "zone_ts": 1792785600000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 4,
+  "htf_d": false,
+  "zone": [
+   0.0042,
+   0.00449
+  ],
+  "daily": {
+   "close": 0.00419,
+   "ema50": 0.0045161073308679104,
+   "ema50_prev": 0.004715267926392779
+  },
+  "bias": "bear",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "VANA",
+  "tf": "4h",
+  "side": "long",
+  "score": 60,
+  "rr": 2.2,
+  "status": "IN ZONE now",
+  "entry": 0.857,
+  "sl": 0.823767857142857,
+  "tp1": 0.93,
+  "tp2": 1.163,
+  "chart": "VANA_4h_long.png",
+  "why": "Swept sell-side liquidity at 0.844 and closed back above it, then broke structure at 0.88. Entry at the OB (0.85-0.864). 1D bias: bear. In discount.",
+  "price": 0.851,
+  "sd": 0.038777296216036095,
+  "lev": 15,
+  "notional": 2578.8285867812947,
+  "margin": 171.92190578541965,
+  "fee_r": 0.025788285867812944,
+  "ts": 1792857600000,
+  "ann": {
+   "lvl": 0.844,
+   "sweep_ts": 1792785600000,
+   "ref_ts": 1792771200000,
+   "refp": 0.88,
+   "mss_ts": 1792828800000,
+   "zone_ts": 1792814400000,
+   "kind": "OB"
+  },
+  "std": false,
+  "touches": 2,
+  "htf_d": true,
+  "zone": [
+   0.85,
+   0.864
+  ],
+  "daily": {
+   "close": 0.852,
+   "ema50": 1.0035927008156937,
+   "ema50_prev": 1.0409586865289893
+  },
+  "bias": "bear",
+  "kind": "OB"
+ },
+ {
+  "symbol": "BREV",
+  "tf": "1h",
+  "side": "long",
+  "score": 53,
+  "rr": 2.14,
+  "status": "waiting for retrace",
+  "entry": 0.08105000000000001,
+  "sl": 0.07761714285714286,
+  "tp1": 0.0884,
+  "tp2": 0.1,
+  "chart": "BREV_1h_long.png",
+  "why": "Swept sell-side liquidity at 0.0785 and closed back above it, then broke structure at 0.0812. Entry at the FVG (0.081-0.0811). 1D bias: bear. In discount.",
+  "price": 0.0814,
+  "sd": 0.042354807438089496,
+  "lev": 14,
+  "notional": 2361.007074490213,
+  "margin": 168.64336246358667,
+  "fee_r": 0.02361007074490213,
+  "ts": 1792864800000,
+  "ann": {
+   "lvl": 0.0785,
+   "sweep_ts": 1792825200000,
+   "ref_ts": 1792807200000,
+   "refp": 0.0812,
+   "mss_ts": 1792828800000,
+   "zone_ts": 1792854000000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 8,
+  "htf_d": true,
+  "zone": [
+   0.081,
+   0.0811
+  ],
+  "daily": {
+   "close": 0.0798,
+   "ema50": 0.08039765682994257,
+   "ema50_prev": 0.08240130057589098
+  },
+  "bias": "bear",
+  "kind": "FVG"
+ }
+]
