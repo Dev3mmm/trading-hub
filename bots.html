@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="shim.js"></script><title>Trend Bots</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff;--pur:#a371f7}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Segoe UI,sans-serif;margin:0;padding:16px}
+.wrap{max-width:1200px;margin:0 auto}h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:0 0 8px}h3{font-size:14px;margin:14px 0 6px;color:#fff}.mut,small,.tag{color:var(--mut)}.tag{font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:10px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:850px){.two{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;padding:5px 8px;border-bottom:1px solid var(--line)}td{padding:5px 8px;border-bottom:1px solid #21262d;font-size:13px}
+.up{color:var(--up)}.dn{color:var(--dn)}.g{color:var(--blue)}.s{color:var(--pur)}.b{color:var(--warn)}a{color:var(--blue)}.tw{overflow-x:auto}
+.badge{display:inline-block;border-radius:4px;padding:1px 8px;font-weight:700;font-size:12px}.bg{background:#1b4332;color:var(--up)}.br{background:#4a1d1d;color:var(--dn)}.bb{background:#1f2a44;color:var(--blue)}.bw{background:#3d3200;color:var(--warn)}
+#cv{width:100%;height:340px;display:block;border:1px solid var(--line);border-radius:6px;background:#0e1116}.heat td{text-align:center;font-size:12px}
+.big{font-size:24px;font-weight:700}.stat{background:#0e1116;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+</style></head><body><div class="wrap">
+<h1>Trend Bots: Growth and Steady <small id="ts"></small> &nbsp;<a href="hub.html" style="font-size:13px">&larr; hub</a></h1>
+<div class="mut">Two versions of the same daily trend-following bot, backtested on 7 years of data and now running as live paper accounts. Nothing here places real orders. Not financial advice.</div>
+<div class="note"><b>Read this first.</b> These are simulated results on today's surviving coins (survivorship flatters every crypto backtest), with fees of 0.14% per round trip included and no look-ahead. Real fills will differ. Expect about 4 in 10 (Growth) or 5 in 10 (Steady) trades to win, with long stretches of small losses between big winners.</div>
+
+<div class="card"><h2>The two bots</h2><table><tr><th></th><th class="g">Growth</th><th class="s">Steady</th></tr>
+<tr><td><b>Buy</b></td><td colspan="2">A daily close above the previous 20-day high, only when Bitcoin is in an uptrend (BTC above its rising 100-day average). Buy at the next daily open (03:00 your time).</td></tr>
+<tr><td><b>Size</b></td><td colspan="2">Risk 0.5% of the account per trade (distance from entry to the previous 10-day low), never more than 20% of the account in one coin, at most 10 positions.</td></tr>
+<tr><td><b>Exit</b></td><td>Everything is sold at the next open after a daily close below the previous 10-day low.</td><td>Sell <b>half at +1R</b> (limit order), move the stop on the rest to your entry (break-even), then exit the rest on the same 10-day-low rule.</td></tr>
+<tr><td><b>Character</b></td><td>Higher return, bigger drawdowns, about 4 in 10 trades win</td><td>Higher win rate, smaller drawdowns, lower return, about 5 in 10 trades win</td></tr></table></div>
+
+<div class="card"><h2>Backtest: headline</h2><div class="tag" id="bt-sub"></div><div class="tw"><table id="head"></table></div>
+<h3>Growth of $10,000 (log scale)</h3><canvas id="cv"></canvas><div class="tag"><span class="g">&#9632; Growth</span> &nbsp; <span class="s">&#9632; Steady</span> &nbsp; <span class="b">&#9632; Bitcoin buy-and-hold</span></div>
+<h3>Return by year</h3><div class="tw"><table id="years"></table></div></div>
+
+<div class="card"><h2>Stress tests: does it survive being hurt?</h2><div id="robust"></div></div>
+<div class="card"><h2>Parameter sensitivity and walk-forward</h2><div class="tag">Entry high (rows) and exit low (columns). Cell = return per year / worst drawdown. If the settings were curve-fitted, only one cell would look good.</div><div id="grid"></div></div>
+
+<div class="card"><h2>Live paper accounts <small id="lv-sub"></small></h2><div class="two" id="live"></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let R=null,L=null;
+const p0=v=>v==null?'-':(100*v).toFixed(0)+'%';const p1=v=>v==null?'-':(100*v>=0?'+':'')+(100*v).toFixed(1)+'%';const cl=v=>v>0?'up':v<0?'dn':'';
+const f=v=>v==null?'':(v<1?(+v).toPrecision(4):(+v).toLocaleString(undefined,{maximumFractionDigits:v<100?3:1}));const usd=v=>(v>=0?'+$':'-$')+Math.abs(v).toFixed(2);
+const dt=ms=>new Date(ms).toLocaleDateString([],{day:'2-digit',month:'short',year:'2-digit'});
+function row(label,s,cls){return `<tr><td class="${cls||''}"><b>${label}</b></td><td>${s.trades||'-'}</td><td>${s.win==null||!s.trades?'-':p0(s.win)}</td><td class="${cl(s.cagr)}"><b>${p1(s.cagr)}</b></td><td class="dn">${p1(s.maxdd)}</td><td>${s.calmar==null?'-':s.calmar.toFixed(2)}</td><td>${s.sharpe==null?'-':s.sharpe.toFixed(2)}</td><td>${p0(s.pos_months)}</td><td class="${cl(s.worst_12m)}">${p1(s.worst_12m)}</td><td>${p0(s.losing_12m)}</td><td>${s.longest_dd_days} d</td></tr>`}
+const HEAD='<tr><th></th><th>Trades</th><th>Win rate</th><th>Return / yr</th><th>Worst drawdown</th><th>Calmar</th><th>Sharpe</th><th>Months up</th><th>Worst 12 months</th><th>12-month windows losing</th><th>Longest time under water</th></tr>';
+function renderBacktest(){if(!R)return;const g=R.profiles.growth.stats,s=R.profiles.steady.stats,b=R.btc.stats;
+ $('bt-sub').textContent=`${R.universe} coins, ${R.coin_years} coin-years, ${g.years.toFixed(1)} years. Risk 0.5% per trade, max 10 positions, fees 0.14% per round trip.`;
+ $('head').innerHTML=HEAD+row('Growth',g,'g')+row('Steady',s,'s')+row('Bitcoin buy-and-hold',b,'b');
+ const ys=[...new Set([...Object.keys(g.yearly),...Object.keys(s.yearly),...Object.keys(b.yearly)])].sort();
+ $('years').innerHTML='<tr><th></th>'+ys.map(y=>`<th>${y}</th>`).join('')+'</tr>'+[['Growth',g,'g'],['Steady',s,'s'],['Bitcoin',b,'b']].map(([n,x,c])=>`<tr><td class="${c}"><b>${n}</b></td>${ys.map(y=>`<td class="${cl(x.yearly[y])}">${x.yearly[y]==null?'-':p1(x.yearly[y])}</td>`).join('')}</tr>`).join('');
+ chart();
+ const rb=R.robust;let h='<div class="two">';
+ for(const [k,nm,c] of [['growth','Growth','g'],['steady','Steady','s']]){const r=rb[k];
+  h+=`<div><h3 class="${c}">${nm}</h3><table><tr><th>Test</th><th>Win</th><th>Return / yr</th><th>Max drawdown</th></tr>
+  <tr><td>Normal</td><td>${p0(R.profiles[k].stats.win)}</td><td class="${cl(R.profiles[k].stats.cagr)}">${p1(R.profiles[k].stats.cagr)}</td><td class="dn">${p1(R.profiles[k].stats.maxdd)}</td></tr>
+  <tr><td>Fees DOUBLED (0.28%)</td><td>${p0(r.fees_double.win)}</td><td class="${cl(r.fees_double.cagr)}">${p1(r.fees_double.cagr)}</td><td class="dn">${p1(r.fees_double.maxdd)}</td></tr>
+  <tr><td>Half the risk per trade (0.25%)</td><td>${p0(r['risk_0.0025'].win)}</td><td class="${cl(r['risk_0.0025'].cagr)}">${p1(r['risk_0.0025'].cagr)}</td><td class="dn">${p1(r['risk_0.0025'].maxdd)}</td></tr>
+  <tr><td>Double the risk per trade (1%)</td><td>${p0(r['risk_0.01'].win)}</td><td class="${cl(r['risk_0.01'].cagr)}">${p1(r['risk_0.01'].cagr)}</td><td class="dn">${p1(r['risk_0.01'].maxdd)}</td></tr>
+  <tr><td>Without its best 3 coins</td><td>${p0(r.no_top3.win)}</td><td class="${cl(r.no_top3.cagr)}">${p1(r.no_top3.cagr)}</td><td class="dn">${p1(r.no_top3.maxdd)}</td></tr>
+  <tr><td>Without its best 8 coins</td><td>${p0(r.no_top8.win)}</td><td class="${cl(r.no_top8.cagr)}">${p1(r.no_top8.cagr)}</td><td class="dn">${p1(r.no_top8.maxdd)}</td></tr>
+  <tr><td>10 random half-universes (min / median / max)</td><td>-</td><td>${p1(r.random_halves.min)} / ${p1(r.random_halves.median)} / ${p1(r.random_halves.max)}</td><td>-</td></tr>
+  <tr><td>BTC filter uses 50-day / 100-day / 200-day average</td><td>-</td><td>${['50','100','200'].map(x=>p1(r.btc_sma[x].cagr)).join(' / ')}</td><td class="dn">${['50','100','200'].map(x=>p1(r.btc_sma[x].maxdd)).join(' / ')}</td></tr></table>
+  <div class="tag">Biggest contributors: ${r.top_coins.map(x=>x[0]+' $'+x[1].toLocaleString()).join(', ')}</div>
+  <table style="margin-top:6px"><tr><th>If you had started at the beginning of</th>${Object.keys(r.start_year).map(y=>`<th>${y}</th>`).join('')}</tr><tr><td>Return per year</td>${Object.values(r.start_year).map(v=>`<td class="${cl(v.cagr)}">${p0(v.cagr)}</td>`).join('')}</tr><tr><td>Worst drawdown</td>${Object.values(r.start_year).map(v=>`<td class="dn">${p0(v.maxdd)}</td>`).join('')}</tr></table></div>`}
+ $('robust').innerHTML=h+'</div>';
+ let gh='<div class="two">';
+ for(const [k,nm,c] of [['growth','Growth','g'],['steady','Steady','s']]){const G=rb[k].grid,ns=[15,20,30,40,55],ms=[7,10,15,20];const best=G.best;
+  const cell=(n,m)=>{const v=G.cells[n+'/'+m];const good=v.calmar>=1;return `<td style="background:${v.cagr>0.15?'#1b4332':v.cagr>0.08?'#243b2a':v.cagr>0?'#2b2f25':'#4a1d1d'};${(n==20&&m==10)?'outline:2px solid #58a6ff;':''}">${p0(v.cagr)}/${p0(v.maxdd)}</td>`};
+  const bb=G.cells[best],dd=G.cells['20/10'];
+  gh+=`<div><h3 class="${c}">${nm}</h3><table class="heat"><tr><th>Entry \\ Exit</th>${ms.map(m=>`<th>${m}d low</th>`).join('')}</tr>${ns.map(n=>`<tr><td><b>${n}d high</b></td>${ms.map(m=>cell(n,m)).join('')}</tr>`).join('')}</table>
+  <div class="tag">Blue outline = the setting we use (20/10). <b>Walk-forward:</b> the best setting on 2019-2022 was <b>${best}</b>; on the unseen 2023-2026 it made ${p1(bb.test_cagr)} per year with worst drawdown ${p1(bb.test_dd)}. Our 20/10 made ${p1(dd.test_cagr)} per year, drawdown ${p1(dd.test_dd)} in the same period.</div></div>`}
+ $('grid').innerHTML=gh+'</div>';
+}
+function chart(){const cv=$('cv'),W=cv.clientWidth,H=340,dp=window.devicePixelRatio||1;cv.width=W*dp;cv.height=H*dp;const g=cv.getContext('2d');g.scale(dp,dp);g.fillStyle='#0e1116';g.fillRect(0,0,W,H);
+ const S=[[R.profiles.growth.curve,'#58a6ff'],[R.profiles.steady.curve,'#a371f7'],[R.btc.curve,'#f0b90b']];let x0=1e99,x1=-1e99,lo=1e99,hi=-1e99;
+ S.forEach(([c])=>c.forEach(([t,e])=>{x0=Math.min(x0,t);x1=Math.max(x1,t);lo=Math.min(lo,Math.log(e));hi=Math.max(hi,Math.log(e))}));
+ const L=52,Rr=10,T=10,B=22,X=t=>L+(t-x0)/(x1-x0)*(W-L-Rr),Y=v=>T+(1-(Math.log(v)-lo)/(hi-lo))*(H-T-B);
+ g.strokeStyle='#21262d';g.fillStyle='#8b949e';g.font='11px system-ui';
+ for(const v of [5000,10000,20000,50000,100000,200000,500000,1000000]){if(Math.log(v)<lo||Math.log(v)>hi)continue;g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-Rr,Y(v));g.stroke();g.fillText('$'+(v>=1e6?(v/1e6)+'M':(v/1000)+'k'),4,Y(v)+4)}
+ for(let y=2020;y<=2026;y++){const t=Date.UTC(y,0,1);if(t<x0||t>x1)continue;g.beginPath();g.moveTo(X(t),T);g.lineTo(X(t),H-B);g.stroke();g.fillText(y,X(t)+3,H-6)}
+ S.forEach(([c,col])=>{g.strokeStyle=col;g.lineWidth=1.8;g.beginPath();c.forEach(([t,e],i)=>i?g.lineTo(X(t),Y(e)):g.moveTo(X(t),Y(e)));g.stroke()})}
+function renderLive(){if(!L)return;$('ts').textContent='live data updated '+new Date(L.ts).toLocaleTimeString();
+ $('lv-sub').innerHTML=`<span class="tag">paper accounts started with the close of ${dt(L.launch)} (UTC) at $10,000 each &middot; Bitcoin uptrend filter is <b class="${L.btc_uptrend?'up':'dn'}">${L.btc_uptrend?'ON: buying allowed':'OFF: no new buys'}</b> &middot; ${L.universe} coins scanned every 30 min, signals change at the daily close (03:00 your time)</span>`;
+ $('live').innerHTML=['growth','steady'].map(k=>{const a=L.profiles[k],c=k==='growth'?'g':'s',eq=a.equity,g=eq-a.equity0;
+  const acts=a.actions;return `<div><h3 class="${c}">${a.name} paper account</h3><div class="grid4"><div class="stat"><div class="tag">Equity</div><div class="big ${cl(g)}">$${eq.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div><div class="stat"><div class="tag">Open</div><div class="big">${a.open.length}</div></div><div class="stat"><div class="tag">Closed</div><div class="big">${a.n_closed}${a.n_closed?` <small>(${a.wins} won)</small>`:''}</div></div></div>
+  <h3>Orders for the next daily open</h3>${acts.length?`<table>${acts.map(x=>`<tr><td><span class="badge ${x.kind==='BUY'?'bg':x.kind==='SELL ALL'?'br':x.kind==='SKIP'?'bw':'bb'}">${x.kind}</span></td><td><b>${x.sym}</b></td><td class="tag">${x.note}${x.size?` &middot; size about $${x.size.toLocaleString()}`:''}</td></tr>`).join('')}</table>`:'<div class="mut">None right now.</div>'}
+  <h3>Open positions</h3>${a.open.length?`<table><tr><th>Coin</th><th>Since</th><th>Entry</th><th>Now</th>${k==='steady'?'<th>+1R</th>':''}<th>Exit level</th><th>R</th><th>P/L</th></tr>${a.open.map(o=>`<tr><td><b>${o.sym}</b></td><td>${dt(o.entry_t)}</td><td>${f(o.entry)}</td><td>${f(o.price)}</td>${k==='steady'?`<td class="up">${o.half_done?'half sold':f(o.target)}</td>`:''}<td class="dn">${f(o.be_stop||o.exit_level)}</td><td class="${cl(o.r_now)}">${o.r_now}R</td><td class="${cl(o.pnl)}">${usd(o.pnl)}</td></tr>`).join('')}</table>`:'<div class="mut">None yet: the first entries fill at the next daily open.</div>'}
+  <h3>Closed trades</h3>${a.closed.length?`<table><tr><th>Coin</th><th>In</th><th>Out</th><th>R</th><th>P/L</th></tr>${a.closed.map(t=>`<tr><td><b>${t.sym}</b></td><td>${dt(t.entry_t)}</td><td>${dt(t.exit_t)}</td><td class="${cl(t.r)}">${t.r}R</td><td class="${cl(t.pnl)}">${usd(t.pnl)}</td></tr>`).join('')}</table>`:'<div class="mut">None yet.</div>'}</div>`}).join('')}
+async function boot(){try{R=await (await fetch('bots_results.json',{cache:'no-store'})).json();renderBacktest()}catch(e){$('head').innerHTML='<tr><td class="mut">Backtest results are still being computed. Reload in a few minutes.</td></tr>'}
+ async function live(){try{L=await (await fetch('api/bots',{cache:'no-store'})).json();if(!L.error)renderLive()}catch(e){}}live();setInterval(live,60000)}
+boot();window.addEventListener('resize',()=>{if(R)chart()});
+</script></body></html>
