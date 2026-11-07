@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="shim.js"></script><title>Trade Plan</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,Segoe UI,sans-serif;margin:0;padding:16px}
+.wrap{max-width:1000px;margin:0 auto}h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:0}h3{font-size:14px;margin:14px 0 6px;color:#fff}.mut,small,.tag{color:var(--mut)}.tag{font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:12px 0;font-size:14px}
+.up{color:var(--up)}.dn{color:var(--dn)}.warn{color:var(--warn)}a{color:var(--blue)}
+.badge{display:inline-block;border-radius:4px;padding:1px 8px;font-weight:700;font-size:12px}.b-go{background:#1b4332;color:var(--up)}.b-wait{background:#3d3200;color:var(--warn)}.b-skip{background:#30363d;color:var(--mut)}.b-buy{background:#1b4332;color:var(--up)}
+.order{background:#0e1116;border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.order div span{display:block;font-size:12px;color:var(--mut)}.order b{font-size:17px}
+ul.chk{list-style:none;padding:0;margin:0}ul.chk li{padding:5px 0 5px 26px;position:relative;border-bottom:1px solid #21262d}ul.chk li:before{content:"\2713";position:absolute;left:4px;color:var(--up);font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:800px){.two{grid-template-columns:1fr}}
+input{background:#0e1116;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;width:100px}
+.rec{background:#0e1116;border:1px solid var(--line);border-radius:8px;padding:10px 14px}.big{font-size:26px;font-weight:700}
+table{border-collapse:collapse;width:100%}td,th{padding:5px 8px;text-align:left;border-bottom:1px solid #21262d;font-size:14px}th{color:var(--mut);font-weight:600;font-size:12px}
+</style></head><body><div class="wrap">
+<h1>Trade plan <small id="ts"></small> &nbsp;<a href="hub.html" style="font-size:14px">&larr; hub</a></h1>
+<div class="mut">The setups that meet our STANDARD right now, why each was picked, and how that kind of setup has performed in testing. Everything is paper-traded automatically.</div>
+<div class="note"><b>Paper trading.</b> Every plan below is already logged as a paper trade (limit order at the entry, stop and target as shown) and is tracked live on the <a href="dashboard.html">dashboard</a>. Nothing here places real orders. The win rates come from a backtest of 71 trades of this exact type, so they are an estimate, not a promise, and I picked "buys only" after looking at the results, so expect the live numbers to come in lower. Not financial advice.</div>
+<div class="card" id="flip"></div>
+<div class="card" id="sum"></div>
+<div id="plans"></div>
+<div id="skips"></div>
+<div class="card"><h2>What "the standard" means</h2><ul class="chk" style="margin-top:8px">
+<li>4-hour timeframe, <b>buys only</b>.</li><li><b>Daily trend is up</b>: the daily close is above the 50-day average and that average is rising.</li>
+<li>The level being defended is a <b>real support</b>: touched 2+ times before, or lines up with a daily swing low.</li>
+<li>The ICT sequence completed: <b>liquidity sweep</b> of that level, then a <b>market structure shift</b>, then a return to the <b>entry zone</b> (FVG / order block).</li>
+<li><b>Stop</b> below the sweep, <b>target</b> at the next liquidity level (at least 1.5x the risk).</li></ul>
+<div class="tag" style="margin-top:8px">Full rules and everything we tested: <a href="standard.html">Analysis standard</a></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let P=null;
+const f=v=>v==null?'':(v<1?(+v).toPrecision(4):(+v).toLocaleString(undefined,{maximumFractionDigits:v<100?4:1}));
+const when=ms=>new Date(ms).toLocaleString([],{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const pct=v=>(v>=0?'+':'')+(100*v).toFixed(1)+'%';
+function load(k,d){try{return localStorage.getItem(k)||d}catch(e){return d}}function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function stateLine(p){const t=p.trade;if(!t)return '<span class="tag">Not yet logged (it will be on the next scan).</span>';
+ const m={pending:'Paper trade logged: waiting for price to reach the entry',open:'Paper trade is OPEN (entry filled)',win:'Paper trade closed: WIN',loss:'Paper trade closed: LOSS (stop hit)',expired:'Paper order expired without filling',timeout:'Paper trade closed at the time limit',manual:'Paper trade closed by you'};
+ return `<b>${m[t.state]||t.state}</b>${t.r!=null?` &middot; result ${t.r>0?'+':''}${t.r}R`:''}<span class="tag"> &middot; logged ${t.added||''}</span>`}
+function render(){if(!P||P.error)return;$('ts').textContent='updated '+new Date(P.ts).toLocaleTimeString();
+ const acc=+load('acct',20),risk=+load('risk',10);const S=P.stats.all,L=P.live_std;
+ const go=P.plans.filter(p=>!p.status.startsWith('MOVED')),skip=P.plans.filter(p=>p.status.startsWith('MOVED'));
+ $('sum').innerHTML=`<div class="two"><div><h2>Right now: ${go.length} setup${go.length==1?'':'s'} to trade</h2><div class="tag" style="margin:4px 0 10px">Your account for the position-size calculator:</div>
+  <label class="tag">Account $ <input id="acct" type="number" value="${acc}"></label> &nbsp; <label class="tag">Risk per trade % <input id="risk" type="number" step="0.25" value="${risk}"></label>
+  <div class="tag" style="margin-top:8px">Your rule: a $20 account, a loss of at most $2 (10%) per trade, no leverage, at most 2 trades open at once. These coins move together, so two open trades can lose together.</div></div>
+  <div class="rec"><div class="tag">Backtest record of this setup type (${S.n} trades, 40 coins, ~8 months, fees included)</div><div><span class="big up">${Math.round(S.win)}%</span> won &nbsp; <span class="big up">+${S.avg_r}R</span> average</div>
+  <div class="tag">Win rate could plausibly be anywhere from ${S.win_lo}% to ${S.win_hi}%. Positive in both halves of the period (+${P.stats.first_half.avg_r}R then +${P.stats.second_half.avg_r}R). Longest losing streak: 5 trades.</div>
+  <div class="tag" style="margin-top:6px"><b>Live paper record so far:</b> ${L.closed} closed${L.closed?` (${L.wins} wins)`:''}, ${L.open} open, ${L.pending} waiting to fill</div></div></div>`;
+ for(const id of ['acct','risk'])$(id).onchange=e=>{save(id,e.target.value);render()};
+ $('plans').innerHTML=go.map(p=>card(p,acc,risk)).join('')||'<div class="card mut">No setup meets the standard right now. Check again after the next 4-hour candle closes (the scanner runs every 10 minutes).</div>';
+ $('skips').innerHTML=skip.length?`<div class="card"><h2>Skip these <span class="badge b-skip">moved away</span></h2><div class="tag" style="margin:4px 0 8px">They met the standard but the price has already run away from the entry zone. Chasing them changes the risk/reward, so wait for a pullback or forget them.</div><table><tr><th>Coin</th><th>Entry zone</th><th>Price now</th><th>Ran</th></tr>${skip.map(p=>`<tr><td><b>${p.symbol}</b></td><td>${f(p.entry)}</td><td>${f(p.live||p.price)}</td><td class="warn">${pct((p.live||p.price)/p.entry-1)} above entry</td></tr>`).join('')}</table></div>`:''}
+function exitsBlock(p,acc,risk,size,sd){const E=P.exits;if(!E)return '';const risk1=p.entry-p.sl;
+ const rows=E.rows.filter(r=>r.mult).map(r=>`<tr><td>${r.mult}R</td><td><b>${f(p.entry+r.mult*risk1)}</b></td><td class="up">+$${(size*sd*r.mult).toFixed(2)}</td><td>${r.win}%</td><td class="${r.avg_r>0?'up':'dn'}">${r.avg_r>0?'+':''}${r.avg_r}R</td></tr>`).join('');
+ return `<h3>Choose your exit (same entry and stop)</h3><table><tr><th>Target</th><th>Price</th><th>Profit at your size</th><th>Won</th><th>Avg</th></tr>${rows}</table><div class="tag">Closer targets win more often but the average result per trade is about the same or lower, and some setups run to the target without ever pulling back to your entry. Loss at the stop: -$${(size*sd).toFixed(2)}. Backtest: ${E.total} filled STANDARD setups.</div>`}
+function card(p,acc,risk){const sd=(p.entry-p.sl)/p.entry,up=p.tp1/p.entry-1,px=p.live||p.price,riskUsd=acc*risk/100,size=Math.min(riskUsd/sd,acc),d=p.daily||{},A=p.ann||{},b=p.bucket;
+ const zone=p.zone||[p.entry,p.entry],inzone=p.status.startsWith('IN ZONE')&&px<=zone[1]*1.001&&px>=zone[0],away=px/p.entry-1;
+ const badge=inzone?'<span class="badge b-go">IN THE ENTRY ZONE NOW</span>':'<span class="badge b-wait">WAIT FOR THE PULLBACK</span>';
+ const order=inzone&&px<=zone[1]?`Price (${f(px)}) is inside the entry zone (${f(zone[0])} to ${f(zone[1])}). Best entry is a <b>limit buy at ${f(p.entry)}</b> (middle of the zone). Buying at market (${f(px)}) would make the reward ${(100*(p.tp1/px-1)).toFixed(1)}% for ${(100*(px/p.sl-1)).toFixed(1)}% risk, which is a worse trade than planned.`:`Place a <b>limit buy at ${f(p.entry)}</b>. Price is ${f(px)} now (${pct(away)} above it), so it only fills if the price pulls back.`;
+ const wr=`<div class="rec"><div class="tag">Setups like this one in the backtest (${b.n} trades${p.rr<2?', target under 2R':p.rr<3?', target 2R to 3R':''})</div><div><span class="big ${b.avg_r>0?'up':'dn'}">${Math.round(b.win)}%</span> won &nbsp;<span class="big ${b.avg_r>0?'up':'dn'}">${b.avg_r>0?'+':''}${b.avg_r}R</span> avg</div>
+  <div class="tag">Range for the true win rate: ${b.win_lo}% to ${b.win_hi}%. Winners averaged +${b.avg_win}R, losers ${b.avg_loss}R. ${b.n<30?'<b class="warn">Small sample, treat with extra caution.</b> ':''}Out of 10 trades like this expect about ${Math.round(b.win/10)} winners and ${10-Math.round(b.win/10)} losers.</div></div>`;
+ return `<div class="card"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2>${p.symbol}/USDT</h2><span class="badge b-buy">BUY LIMIT &middot; 4h</span>${badge}<span class="tag" style="margin-left:auto">${stateLine(p)}</span></div>
+ <div class="order"><div><span>Buy limit at</span><b>${f(p.entry)}</b></div><div><span>Stop loss</span><b class="dn">${f(p.sl)}</b><span>${pct(-sd)} from entry</span></div><div><span>Target 1</span><b class="up">${f(p.tp1)}</b><span>${pct(up)} from entry</span></div><div><span>Reward : risk</span><b>${p.rr.toFixed(2)}</b></div><div><span>Position size</span><b>$${size.toFixed(2)}</b><span>max loss $${(size*sd).toFixed(2)} at the stop${size<riskUsd/sd?' (whole account, no leverage)':''}</span></div><div><span>If target is hit</span><b class="up">+$${(size*up).toFixed(2)}</b></div></div>
+ <div>${order}</div><div class="tag" style="margin-top:4px"><b>Cancel the order</b> if a 4-hour candle closes below ${f(p.sl)} before it fills, or if it has not filled within about 2 days. Move nothing else. Leverage is not needed (1-2x at most: the stop is ${(100*sd).toFixed(1)}% away, max safe leverage ${p.lev}x).</div>
+ <div class="two" style="margin-top:12px"><div><h3>Why I picked it (the analysis)</h3><ul class="chk">
+  <li><b>Daily trend is up.</b> Daily close ${f(d.close)} is above its 50-day average ${f(d.ema50)}, and that average is rising (${pct(d.ema50/d.ema50_prev-1)} over 10 days).</li>
+  <li><b>Real support level.</b> ${f(A.lvl)} is a level buyers defended: it had been touched ${p.touches} time${p.touches==1?'':'s'} before${p.htf_d?', and it lines up with a swing low on the daily chart':''}. Many traders have stops just below it.</li>
+  <li><b>Liquidity sweep.</b> On ${when(A.sweep_ts)} price dipped under ${f(A.lvl)} (triggering those stops) and closed back above it: the classic stop-hunt, a sign big buyers absorbed the selling.</li>
+  <li><b>Market structure shift.</b> By ${when(A.mss_ts)} price closed above ${f(A.refp)}, the last lower high, so buyers took control.</li>
+  <li><b>Entry zone.</b> The move left a ${A.kind==='FVG'?'fair value gap (an imbalance price usually returns to fill)':'order block (the last down-candle before the move up)'} between ${f(zone[0])} and ${f(zone[1])}. Entry is the middle of it, a retest.</li>
+  <li><b>Risk is defined.</b> Stop under the sweep low at ${f(p.sl)}: if price gets there the idea is wrong. Target ${f(p.tp1)} is the next liquidity level above, giving ${p.rr.toFixed(2)} times the risk.</li></ul></div>
+ <div><h3>How often does this work?</h3>${wr}${exitsBlock(p,acc,risk,size,sd)}<h3>What could go wrong</h3><ul style="margin:0;padding-left:18px;color:var(--mut);font-size:14px"><li>About half of these trades lose. A loss is capped by the stop.</li><li>Crypto moves together: if Bitcoin drops hard, this drops too.</li><li>The price may never pull back, and then there is no trade.</li></ul></div></div></div>`}
+async function flipTick(){try{const F=await (await fetch('api/flip')).json();
+ const eq=F.equity,pr=Math.max(0,Math.min(100,100*(eq-F.start_equity)/F.start_equity)),g=eq-F.start_equity;
+ const money=v=>(v>=0?'+$':'-$')+Math.abs(v).toFixed(2);
+ $('flip').innerHTML=`<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><h2>The $${F.start_equity} flip account <span class="tag">(paper, started ${when(F.start)})</span></h2>
+  <div class="tag" style="margin-top:4px">Rules: every STANDARD setup that fills is taken automatically. Size = whatever loses at most ${F.rules.max_loss_pct}% ($${(F.start_equity*F.rules.max_loss_pct/100).toFixed(0)} at the start) at the stop, never more than the free cash (no leverage), max ${F.rules.max_open} open, minimum $${F.rules.min_order} order.</div></div>
+  <div style="text-align:right"><div class="big ${g>=0?'up':'dn'}">$${eq.toFixed(2)}</div><div class="tag">${money(g)} (${(100*g/F.start_equity).toFixed(1)}%) &middot; goal $${(2*F.start_equity).toFixed(0)}</div></div></div>
+ <div style="background:#0e1116;border:1px solid var(--line);border-radius:6px;height:10px;margin:10px 0;overflow:hidden"><div style="height:100%;width:${pr}%;background:var(--up)"></div></div>
+ <div class="tag">Cash $${F.cash.toFixed(2)} &middot; in trades $${F.invested.toFixed(2)} &middot; realized ${money(F.realized)} &middot; ${F.n_closed} closed (${F.wins} won)</div>
+ ${F.waiting.length?`<h3>Waiting orders (limit buys not filled yet)</h3><div class="tag">With $20 and no leverage, the first order that fills uses the whole account, so the others wait until it closes.</div><table><tr><th>Coin</th><th>Buy limit</th><th>Price now</th><th>Would invest</th><th>Max loss (stop)</th><th>Gain at target</th></tr>${F.waiting.map(w=>`<tr><td><b>${w.symbol}</b></td><td>${f(w.entry)}</td><td>${f(w.price)}</td><td>$${w.size.toFixed(2)}</td><td class="dn">-$${w.max_loss.toFixed(2)} (${w.stop_pct}%)</td><td class="up">+$${w.target_gain.toFixed(2)}</td></tr>`).join('')}</table>`:''}
+ ${F.open.length?`<h3>Open trades</h3><table><tr><th>Coin</th><th>Invested</th><th>Entry</th><th>Price now</th><th>Stop</th><th>Target</th><th>Max loss</th><th>P/L now</th></tr>${F.open.map(o=>`<tr><td><b>${o.symbol}</b></td><td>$${o.size.toFixed(2)}</td><td>${f(o.entry)}</td><td>${f(o.price)}</td><td class="dn">${f(o.stop)}</td><td class="up">${f(o.tp1)}</td><td>-$${o.max_loss.toFixed(2)}</td><td class="${o.unreal>=0?'up':'dn'}">${money(o.unreal)}</td></tr>`).join('')}</table>`:''}
+ ${F.closed.length?`<h3>Closed trades</h3><table><tr><th>Coin</th><th>Invested</th><th>Result</th><th>P/L</th></tr>${F.closed.map(c=>`<tr><td><b>${c.symbol}</b></td><td>$${c.size.toFixed(2)}</td><td>${c.r>0?'+':''}${c.r}R (${c.state})</td><td class="${c.pnl>=0?'up':'dn'}">${money(c.pnl)}</td></tr>`).join('')}</table>`:''}
+ <div class="tag" style="margin-top:8px"><b>Reality check on "flipping" $20.</b> A loss at the stop costs about $1 to $1.60 here (5-8% of the position), inside your $2 limit. Simulated on the backtest results, a $20 account reached $40 within 25 trades about 66% of the time IF the backtest edge is real, but only about 4% if there is really no edge, and in that case it ends below $20 more than half the time. Expect a slow, bumpy climb at best: at most a few setups appear each week.</div>`}catch(e){}}
+async function tick(){try{P=await (await fetch('api/plan')).json();if(document.activeElement&&document.activeElement.tagName==='INPUT')return;render()}catch(e){}}tick();flipTick();setInterval(tick,15000);setInterval(flipTick,15000);
+</script></body></html>
