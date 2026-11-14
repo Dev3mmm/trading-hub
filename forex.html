@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="shim.js"></script><title>Forex News Board</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,sans-serif;margin:0;padding:16px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}small,.mut{color:var(--mut)}
+.wrap{max-width:1250px;margin:0 auto}.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0}
+.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:10px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.stat{background:#0e1116;border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.stat b{font-size:18px}.up{color:var(--up)}.dn{color:var(--dn)}.warn{color:var(--warn)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}button{background:#21262d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
+button.on{background:#1f3a5f;border-color:var(--blue)}button:hover{background:#30363d}
+table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid #21262d;vertical-align:top}tr.ev{cursor:pointer}tr.ev:hover{background:#1c2330}tr.day td{background:#0b0e13;color:var(--mut);font-weight:700;padding:8px}
+.cur{display:inline-block;min-width:38px;text-align:center;border-radius:4px;padding:1px 6px;font-weight:700;background:#21262d}
+.badge{display:inline-block;border-radius:4px;padding:1px 7px;font-weight:700;font-size:12px}.b-pos{background:#1b4332;color:var(--up)}.b-neg{background:#4a1d1d;color:var(--dn)}.b-flat{background:#30363d;color:var(--mut)}
+.b-strong{background:#1b4332;color:var(--up)}.b-moderate{background:#3d3200;color:var(--warn)}.b-weak,.b-no{background:#30363d;color:var(--mut)}
+.chip{display:inline-block;border-radius:4px;padding:1px 6px;margin:1px 2px 1px 0;font-size:12px;font-weight:700}.long{background:#1b4332;color:var(--up)}.short{background:#4a1d1d;color:var(--dn)}
+.dim{opacity:.38}.live{outline:1px solid var(--blue);border-radius:4px}.hist td{font-size:13px}.soon{background:#1a2333}
+.tag{font-size:12px;color:var(--mut)}@media(max-width:800px){.hide{display:none}}
+</style></head><body><div class="wrap">
+<h1>Forex News Board <small id="clock"></small> &nbsp;<a href="index.html" style="font-size:14px;color:#58a6ff">&larr; hub</a></h1>
+<div class="mut">High-impact releases: when they hit, whether they came out positive or negative for the currency, and which pairs to long or short.</div>
+<div id="alert"></div>
+<div class="note"><b>Strategy: the first 10 minutes.</b> When a number prints, the board marks it <b>positive or negative for the currency</b> and shows what to trade: <b>positive &rarr; long that currency, negative &rarr; short it</b> (for a pair where it is the quote currency, the pair goes the other way). Trade window = <b>release to +10 minutes</b>, small size, tight stop.
+Which way "positive" points is learned from history where the evidence is convincing (unemployment and jobless claims are inverted). The paper-trade scoreboard tests <b>entering 1, 2, 3 and 5 minutes after the release</b> so we learn how fast it must be done. Speed matters: the first seconds are gone before any screen updates. Not financial advice.</div>
+<div class="card" id="sniper"><h2>News sniper &mdash; demo, first 30-60 seconds <small>(runs on GitHub during releases: live EUR/USD bid/ask from Binance, no real orders; gold is PC-only)</small></h2><div id="snbody" class="mut">loading...</div></div>
+<div class="card"><h2>Paper-trade scoreboard <small id="rules"></small></h2><div class="stats" id="stats"></div></div>
+<div class="card"><div class="bar" id="filters"></div><div id="err" class="warn"></div>
+<table><thead><tr><th>When (your time)</th><th></th><th>Event</th><th class="hide">Forecast</th><th class="hide">Previous</th><th>Actual</th><th>Verdict</th><th>If positive / if negative &rarr; trade</th><th class="hide">History</th></tr></thead><tbody id="ev"></tbody></table></div>
+<div class="card"><h2>Paper trades <small>(main pair of each release, entered T+1/2/3/5 min after, exit at +10 min)</small></h2><table><thead><tr><th>Release</th><th>Event</th><th>Verdict</th><th>Trade</th><th>Confidence</th><th>Entry</th><th>Result</th></tr></thead><tbody id="tr"></tbody></table></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let D=null,filt='all',cf='ALL',open={},H={};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=v=>v==null?'':(Math.abs(v)>=1000?v.toLocaleString(undefined,{maximumFractionDigits:1}):+(+v).toPrecision(4));
+const tfmt=ms=>new Date(ms).toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'});
+const dfmt=ms=>new Date(ms).toLocaleDateString([],{weekday:'long',day:'numeric',month:'long'});
+function rel(ms){const d=ms-D.now,a=Math.abs(d)/60000;const s=a<60?Math.round(a)+' min':a<1440?(a/60).toFixed(1)+' h':Math.round(a/1440)+' d';return d>=0?'in '+s:s+' ago'}
+const chip=(p,s)=>`<span class="chip ${s}">${s==='long'?'LONG':'SHORT'} ${p}</span>`;
+const conf=c=>`<span class="badge b-${c==='no history'?'no':c}" title="${c==='strong'?'8+ past releases and a clear, consistent reaction':c==='moderate'?'8+ releases, reaction fairly consistent':c==='weak'?'reaction was inconsistent in past releases':'not enough history'}">${c}</span>`;
+function verdictBadge(e){if(!e.verdict)return e.actual!=null?'<span class="mut">no forecast to compare</span>':'<span class="mut">waiting</span>';const c=e.verdict==='positive'?'b-pos':e.verdict==='negative'?'b-neg':'b-flat';return `<span class="badge ${c}">${e.verdict.toUpperCase()}</span> <span class="tag">for ${e.cur}</span>`}
+function histLine(e){const p=e.play;if(!p)return '<span class="mut">no history</span>';
+ return `${conf(e.conf)}<div class="tag">n=${p.n}, right direction ${Math.round(p.hit*100)}%<br>positive ${p.mean_pos>0?'+':''}${p.mean_pos}bp / negative ${p.mean_neg}bp</div>`}
+function render(){
+ if(!D)return;const evs=D.events.filter(e=>(cf==='ALL'||e.cur===cf)&&(filt==='all'||(filt==='up'&&e.T>D.now-3600000)||(filt==='rel'&&e.actual!=null)));
+ let h='',day='';
+ for(const e of evs){const dk=dfmt(e.T);if(dk!==day){day=dk;h+=`<tr class="day"><td colspan="9">${dk}</td></tr>`}
+  const soon=e.T>D.now&&e.T-D.now<3600000*2;const ur=e.verdict==='positive'?1:e.verdict==='negative'?0:-1;
+  const pos=e.if_pos.filter(x=>x[0]!=='XAUUSD'||e.cur==='USD').map(x=>chip(x[0],x[1])).join('');const neg=e.if_neg.filter(x=>x[0]!=='XAUUSD'||e.cur==='USD').map(x=>chip(x[0],x[1])).join('');
+  const reac=e.reaction&&Object.keys(e.reaction).length?`<div class="tag">since release: ${Object.entries(e.reaction).map(([p,v])=>`${p} <b class="${v>0?'up':v<0?'dn':''}">${v>0?'+':''}${v}bp</b>`).join(' &middot; ')} <span class="mut">(${e.cur} strength)</span></div>`:'';
+  h+=`<tr class="ev ${soon?'soon':''}" data-k="${esc(e.key)}"><td><b>${tfmt(e.T)}</b><div class="tag">${rel(e.T)}</div></td><td><span class="cur">${e.cur}</span></td>
+  <td><b>${esc(e.title)}</b><div class="tag">${esc(e.period)}</div></td><td class="hide">${e.forecast==null?'':fmt(e.forecast)+esc(e.unit)}</td><td class="hide">${e.previous==null?'':fmt(e.previous)+esc(e.unit)}</td>
+  <td><b>${e.actual==null?'':fmt(e.actual)+esc(e.unit)}</b></td><td>${verdictBadge(e)}</td>
+  <td><div class="${ur===0?'dim':''}">${ur===1?'&#9654; ':''}<span class="tag">if positive:</span> ${pos}</div><div class="${ur===1?'dim':''}">${ur===0?'&#9654; ':''}<span class="tag">if negative:</span> ${neg}</div>${reac}</td>
+  <td class="hide">${histLine(e)}</td></tr>`;
+  if(open[e.key]){const p=H[e.key];h+=`<tr><td colspan="9"><div class="card hist">${p&&p.last?`<b>How ${esc(e.title)} (${e.country}) played out before</b> <span class="tag">move = ${e.cur} strength across its pairs, from the start of the release hour to its end</span>
+   <table><tr><th>Date</th><th>Forecast</th><th>Actual</th><th>Verdict</th><th>Move ~1h</th><th>Move ~2h</th></tr>${p.last.map(r=>{const v=p.pol*r.beat>0;return `<tr><td>${new Date(r.T).toLocaleDateString()}</td><td>${fmt(r.forecast)}</td><td>${fmt(r.actual)}</td><td><span class="badge ${v?'b-pos':'b-neg'}">${v?'POSITIVE':'NEGATIVE'}</span></td><td class="${r.r1>0?'up':'dn'}">${r.r1>0?'+':''}${r.r1.toFixed(1)}bp</td><td class="${r.r2>0?'up':'dn'}">${r.r2>0?'+':''}${r.r2.toFixed(1)}bp</td></tr>`}).join('')}</table>`:'<span class="mut">Not enough history for this release.</span>'}</div></td></tr>`}
+ }
+ $('ev').innerHTML=h||'<tr><td colspan="9" class="mut">No events.</td></tr>';
+ const S=D.stats,box=(n,s)=>`<div class="stat"><div class="tag">${n}</div>${s?`<b class="${s.usd>=0?'up':'dn'}">${s.usd>=0?'+':'-'}$${Math.abs(s.usd)}</b><div class="tag">${s.n} trades &middot; win ${s.win}% &middot; avg ${s.avg_bp>0?'+':''}${s.avg_bp}bp</div>`:'<b class="mut">no closed trades</b>'}</div>`;
+ $('stats').innerHTML=Object.entries(D.by_delay).map(([d,s])=>box('Enter T+'+d+' min',s)).join('')+box('Strong-history events (T+1)',S.strong)+box('Moderate (T+1)',S.moderate)+box('Weak / no history (T+1)',S.weak);
+ $('rules').textContent=`(exit at +${D.rules.hold} min or ${D.rules.stop}bp stop, ${D.rules.cost}bp cost, $${D.rules.risk} risk per trade)`;
+ $('tr').innerHTML=D.trades.map(t=>{const r=t.state==='closed'?`<b class="${t.bp>0?'up':'dn'}">${t.bp>0?'+':''}${t.bp.toFixed(1)}bp (${t.exit==='stop'?'stopped':'time exit'})</b>`:t.state==='open'?`open <b class="${t.bp_now>0?'up':'dn'}">${(t.bp_now>0?'+':'')+(t.bp_now||0).toFixed(1)}bp</b>`:`<span class="mut">${t.state}</span>`;
+  return `<tr><td>${tfmt(t.T)}</td><td>${esc(t.event)}</td><td><span class="badge ${t.verdict==='positive'?'b-pos':'b-neg'}">${t.verdict.toUpperCase()}</span></td><td>${chip(t.pair,t.side)} <span class="tag">T+${t.delay||''}</span></td><td>${conf(t.conf)}</td><td>${t.entry?fmt(t.entry):''}</td><td>${r}</td></tr>`}).join('')||'<tr><td colspan="7" class="mut">No trades yet. They appear after the first release with an actual number.</td></tr>';
+ const errs=Object.keys(D.errors||{});$('err').textContent=errs.length?'Price feed problem for: '+errs.join(', ')+' (retrying)':'';
+}
+let skew=0,snd=false,seenA=new Set(),actx=null;
+function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,0.25,0.5].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.2,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+t+.2);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.22)})}catch(e){}}
+const mmss=ms=>{ms=Math.max(0,Math.round(ms/1000));return String(Math.floor(ms/60)).padStart(2,'0')+':'+String(ms%60).padStart(2,'0')};
+function alerts(){
+ if(!D)return;const now=Date.now()+skew;let h='';
+ const live=D.events.filter(e=>(e.verdict==='positive'||e.verdict==='negative')&&now>=e.T&&now-e.T<10*60000);
+ for(const e of live){const pos=e.verdict==='positive',ch=(pos?e.if_pos:e.if_neg).filter(x=>x[0]!=='XAUUSD'||e.cur==='USD').map(x=>chip(x[0],x[1])).join('');
+  const key=e.id+'|'+e.verdict;if(!seenA.has(key)){seenA.add(key);if(snd)beep();try{if(window.Notification&&Notification.permission==='granted')new Notification(e.cur+' '+e.title+': '+e.verdict.toUpperCase(),{body:'actual '+e.actual+' vs forecast '+e.forecast})}catch(x){}}
+  h+=`<div class="card" style="border-color:${pos?'#3fb950':'#f85149'};border-width:2px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><b style="font-size:17px">&#9889; ${e.cur} ${esc(e.title)}</b> &nbsp;<span class="badge ${pos?'b-pos':'b-neg'}">${e.verdict.toUpperCase()} for ${e.cur}</span></div>
+  <div><b style="font-size:20px">${mmss(e.T+10*60000-now)}</b> <span class="tag">left in the 10-minute window</span></div></div>
+  <div style="margin:6px 0">Actual <b>${fmt(e.actual)}${esc(e.unit)}</b> vs forecast <b>${fmt(e.forecast)}${esc(e.unit)}</b> (previous ${fmt(e.previous)}${esc(e.unit)}) &middot; ${conf(e.conf)} ${e.latency_s!=null?`<span class="tag">number reached the board ${e.latency_s}s after the release</span>`:''}</div>
+  <div style="font-size:15px">${pos?'Positive':'Negative'} &rarr; ${ch}</div>${e.reaction&&Object.keys(e.reaction).length?`<div class="tag">already moved: ${Object.entries(e.reaction).map(([p,v])=>`${p} <b class="${v>0?'up':'dn'}">${v>0?'+':''}${v}bp</b>`).join(' &middot; ')} (${e.cur} strength)</div>`:''}</div>`}
+ const nx=D.events.filter(e=>e.T>now&&e.T-now<45*60000).sort((a,b)=>a.T-b.T)[0];
+ if(nx&&!live.length)h+=`<div class="card" style="border-color:#58a6ff"><b>NEXT: ${nx.cur} ${esc(nx.title)}</b> in <b style="font-size:18px">${mmss(nx.T-now)}</b> &middot; forecast ${nx.forecast==null?'?':fmt(nx.forecast)+esc(nx.unit)} &middot; previous ${nx.previous==null?'?':fmt(nx.previous)+esc(nx.unit)} &middot; ${conf(nx.conf)}<div style="margin-top:4px"><span class="tag">if positive:</span> ${nx.if_pos.filter(x=>x[0]!=='XAUUSD'||nx.cur==='USD').map(x=>chip(x[0],x[1])).join('')}<br><span class="tag">if negative:</span> ${nx.if_neg.filter(x=>x[0]!=='XAUUSD'||nx.cur==='USD').map(x=>chip(x[0],x[1])).join('')}</div></div>`;
+ h+=`<div class="tag" style="margin:4px 0">${snd?'Sound on':'<button id="snd">Enable sound + desktop alerts</button>'}</div>`;
+ $('alert').innerHTML=h}
+document.addEventListener('click',e=>{if(e.target.id==='snd'){snd=true;beep();try{Notification.requestPermission()}catch(x){};alerts()}});
+function filters(){const cs=['ALL',...new Set(D.events.map(e=>e.cur))];$('filters').innerHTML=[['all','All'],['up','Upcoming'],['rel','Released']].map(([k,l])=>`<button data-f="${k}" class="${filt===k?'on':''}">${l}</button>`).join('')+'<span class="mut">&nbsp;|&nbsp;</span>'+cs.map(c=>`<button data-c="${c}" class="${cf===c?'on':''}">${c}</button>`).join('')}
+document.addEventListener('click',async ev=>{const b=ev.target.closest('button');if(b){if(b.dataset.f)filt=b.dataset.f;if(b.dataset.c)cf=b.dataset.c;filters();render();return}
+ const r=ev.target.closest('tr.ev');if(r){const k=r.dataset.k;open[k]=!open[k];if(open[k]&&!H[k])H[k]=await (await fetch('api/history?key='+encodeURIComponent(k))).json();render()}});
+async function tick(){try{D=await (await fetch('api/state')).json();skew=D.now-Date.now();if(!$('filters').innerHTML)filters();render()}catch(e){}}
+setInterval(()=>{$('clock').textContent=new Date().toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' local'},1000);
+
+let SN=null,snSel=null;
+async function snTick(){try{SN=await (await fetch('api/sniper')).json();snRender()}catch(e){}}
+function snRender(){if(!SN)return;const T=SN.table,ds=Object.keys(T).sort((a,b)=>a-b),hs=['30','60','180','300'];
+ let h=`<div class="tag">${SN.n_real} live releases traded &middot; the number reached the sniper on average ${SN.avg_latency==null?'(no data yet)':SN.avg_latency+'s'} after the release. Entries are at the real ask/bid (spread paid). Binance trading fees are NOT included.</div>`;
+ h+=`<h3 style="margin:10px 0 4px">Average result (bp) by how fast we enter and when we exit (measured from the release)</h3>`;
+ h+=ds.length?`<table><tr><th>Entry after number seen</th>${hs.map(x=>`<th>exit +${x}s</th>`).join('')}</tr>${ds.map(d=>`<tr><td>+${d}s</td>${hs.map(x=>{const c=T[d][x];return `<td>${c?`<b class="${c.avg>0?'up':'dn'}">${c.avg>0?'+':''}${c.avg}bp</b> <span class="tag">win ${c.win}% n=${c.n}</span>`:''}</td>`}).join('')}</tr>`).join('')}</table>`:'<div class="mut">No live releases traded yet. The first is armed below.</div>';
+ h+=`<h3 style="margin:10px 0 4px">Sniper targets (next 40h)</h3><table><tr><th>When (your time)</th><th></th><th>Event</th><th>Forecast</th><th>Previous</th><th>Impact</th></tr>${SN.targets.map(t=>`<tr><td><b>${tfmt(t.T)}</b> <span class="tag">${rel(t.T)}</span></td><td><span class="cur">${t.cur}</span></td><td>${esc(t.title)}</td><td>${fmt(t.forecast)}${esc(t.unit)}</td><td>${t.previous==null?'':fmt(t.previous)+esc(t.unit)}</td><td>${t.imp>=1?'<span class="badge b-pos">HIGH</span>':'medium'}</td></tr>`).join('')||'<tr><td colspan=6 class=mut>none</td></tr>'}</table>`;
+ h+=`<h3 style="margin:10px 0 4px">Past releases (click for the price path)</h3><table><tr><th>Release</th><th>Event</th><th>Forecast</th><th>Actual</th><th>Verdict</th><th>Seen after</th><th>Market move at +30s / +60s (mid, first instrument)</th></tr>${SN.sessions.map((x,i)=>{const k=Object.keys(x.mid_move_bp||{})[0],m=k?x.mid_move_bp[k]:{};return `<tr class="ev" data-sn="${i}"><td>${tfmt(x.T)}${x.test?' <span class="badge b-flat">TEST</span>':''}</td><td>${esc(x.event)}</td><td>${fmt(x.forecast)}</td><td><b>${fmt(x.actual)}</b></td><td>${x.verdict?`<span class="badge ${x.verdict==='positive'?'b-pos':x.verdict==='negative'?'b-neg':'b-flat'}">${x.verdict.toUpperCase()}</span>`:'<span class="mut">not seen</span>'}</td><td>${x.detected_s==null?'':x.detected_s+'s'}</td><td>${k||''} ${m['30']!=null?m['30']+'bp / '+(m['60']??'')+'bp':''}</td></tr>`+(snSel===i?`<tr><td colspan=7><div id="snchart"></div></td></tr>`:'')}).join('')||'<tr><td colspan=7 class=mut>No releases yet.</td></tr>'}</table>`;
+ if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#snbody'))return;$('snbody').innerHTML=h;if(snSel!=null)snChart(SN.sessions[snSel])}
+async function snChart(x){const inst=(x.trades[0]&&x.trades[0].inst)||Object.keys(x.mid_move_bp||{})[0];if(!inst)return;const tk=await (await fetch('api/sniper_ticks?id='+encodeURIComponent(x.id)+'&inst='+inst)).json();if(!tk.length)return;
+ const box=$('snchart');if(!box)return;box.innerHTML='<canvas id="snc" style="width:100%;height:300px"></canvas><div class="tag">'+inst+' mid price in bp vs the price 2s before the release. Grey line = release, blue = number seen, arrows = our entries, dots = exits (+30s/+60s/+180s/+300s).</div>';
+ const cv=$('snc'),W=cv.clientWidth,Hh=300,dp=window.devicePixelRatio||1;cv.width=W*dp;cv.height=Hh*dp;const g=cv.getContext('2d');g.scale(dp,dp);
+ const base=(()=>{for(const t of tk)if(t[0]>=x.T-2000)return(t[2]+t[3])/2;return(tk[0][2]+tk[0][3])/2})();const pts=tk.map(t=>[(t[0]-x.T)/1000,((t[2]+t[3])/2/base-1)*1e4]);
+ const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys,-3),y1=Math.max(...ys,3);const L=40,R=10,T=10,B=22;
+ const X=v=>L+(v-x0)/(x1-x0)*(W-L-R),Y=v=>T+(1-(v-y0)/(y1-y0))*(Hh-T-B);g.fillStyle='#0e1116';g.fillRect(0,0,W,Hh);g.strokeStyle='#21262d';g.fillStyle='#8b949e';g.font='11px system-ui';
+ for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4;g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-R,Y(v));g.stroke();g.fillText(v.toFixed(1)+'bp',2,Y(v)+4)}
+ for(const s of [0,30,60,120,180,240,300]){if(s<x0||s>x1)continue;g.fillText((s>=0?'+':'')+s+'s',X(s)-10,Hh-6)}
+ const vl=(v,c,lab)=>{g.strokeStyle=c;g.setLineDash([4,4]);g.beginPath();g.moveTo(X(v),T);g.lineTo(X(v),Hh-B);g.stroke();g.setLineDash([]);g.fillStyle=c;g.fillText(lab,X(v)+3,T+10)};vl(0,'#8b949e','release');if(x.detected_s!=null)vl(x.detected_s,'#58a6ff','number seen');
+ g.strokeStyle='#c9d1d9';g.lineWidth=1.5;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.stroke();
+ for(const t of x.trades.filter(t=>t.inst===inst)){const e=pts.find(p=>p[0]>=t.entry_after_release_s);if(e){g.fillStyle=t.side==='long'?'#3fb950':'#f85149';g.beginPath();g.arc(X(e[0]),Y(e[1]),4,0,7);g.fill()}
+  for(const h of Object.keys(t.exits)){const p=pts.find(q=>q[0]>=+h);if(p){g.strokeStyle='#f0b90b';g.beginPath();g.arc(X(p[0]),Y(p[1]),4,0,7);g.stroke()}}}}
+document.addEventListener('click',e=>{const r=e.target.closest('tr[data-sn]');if(r){const i=+r.dataset.sn;snSel=snSel===i?null:i;snRender()}});
+snTick();setInterval(snTick,5000);
+tick();setInterval(tick,3000);setInterval(alerts,1000);
+</script></body></html>

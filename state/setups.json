@@ -1,0 +1,90 @@
+[
+ {
+  "symbol": "SHELL",
+  "tf": "4h",
+  "side": "long",
+  "score": 73,
+  "rr": 2.2,
+  "status": "IN ZONE now",
+  "entry": 0.02842,
+  "sl": 0.017856714285714285,
+  "tp1": 0.05163,
+  "tp2": 0.05163,
+  "chart": "SHELL_4h_long.png",
+  "why": "Swept sell-side liquidity at 0.01916 and closed back above it, then broke structure at 0.02049. Entry at the FVG (0.02244-0.0344). 1D bias: range. In discount.",
+  "price": 0.02717,
+  "sd": 0.3716849301296874,
+  "lev": 1,
+  "notional": 269.04507526067374,
+  "margin": 269.04507526067374,
+  "fee_r": 0.0026904507526067374,
+  "ts": 1794686400000,
+  "ann": {
+   "lvl": 0.01916,
+   "sweep_ts": 1794484800000,
+   "ref_ts": 1794283200000,
+   "refp": 0.02049,
+   "mss_ts": 1794571200000,
+   "zone_ts": 1794571200000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 9,
+  "htf_d": true,
+  "zone": [
+   0.02244,
+   0.0344
+  ],
+  "daily": {
+   "close": 0.03636,
+   "ema50": 0.02289424388403772,
+   "ema50_prev": 0.023207414318980452
+  },
+  "bias": "range",
+  "kind": "FVG"
+ },
+ {
+  "symbol": "TRX",
+  "tf": "4h",
+  "side": "short",
+  "score": 60,
+  "rr": 3.43,
+  "status": "MOVED AWAY - limit order only",
+  "entry": 0.3115,
+  "sl": 0.31426678571428573,
+  "tp1": 0.302,
+  "tp2": 0.302,
+  "chart": "TRX_4h_short.png",
+  "why": "Swept buy-side liquidity at 0.3138 and closed back below it, then broke structure at 0.3107. Entry at the FVG (0.3102-0.3128). 1D bias: bear. Not in ideal half of range.",
+  "price": 0.3086,
+  "sd": 0.008882137124512794,
+  "lev": 20,
+  "notional": 11258.551697431178,
+  "margin": 562.9275848715589,
+  "fee_r": 0.11258551697431178,
+  "ts": 1794686400000,
+  "ann": {
+   "lvl": 0.3138,
+   "sweep_ts": 1794643200000,
+   "ref_ts": 1794556800000,
+   "refp": 0.3107,
+   "mss_ts": 1794657600000,
+   "zone_ts": 1794643200000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 1,
+  "htf_d": true,
+  "zone": [
+   0.3102,
+   0.3128
+  ],
+  "daily": {
+   "close": 0.3122,
+   "ema50": 0.32639669424620993,
+   "ema50_prev": 0.33036577229916936
+  },
+  "bias": "bear",
+  "kind": "FVG"
+ }
+]
