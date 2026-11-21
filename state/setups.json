@@ -1,0 +1,46 @@
+[
+ {
+  "symbol": "ORCA",
+  "tf": "4h",
+  "side": "long",
+  "score": 55,
+  "rr": 2.07,
+  "status": "waiting for retrace",
+  "entry": 1.145,
+  "sl": 1.0331357142857143,
+  "tp1": 1.377,
+  "tp2": 1.402,
+  "chart": "ORCA_4h_long.png",
+  "why": "Swept sell-side liquidity at 1.1100 and closed back above it, then broke structure at 1.1590. Entry at the FVG (1.1250-1.1650). 1D bias: bear. In discount.",
+  "price": 1.178,
+  "sd": 0.09769806612601376,
+  "lev": 6,
+  "notional": 1023.5617138113782,
+  "margin": 170.59361896856305,
+  "fee_r": 0.010235617138113783,
+  "ts": 1795291200000,
+  "ann": {
+   "lvl": 1.11,
+   "sweep_ts": 1795104000000,
+   "ref_ts": 1795060800000,
+   "refp": 1.159,
+   "mss_ts": 1795262400000,
+   "zone_ts": 1795248000000,
+   "kind": "FVG"
+  },
+  "std": false,
+  "touches": 1,
+  "htf_d": true,
+  "zone": [
+   1.125,
+   1.165
+  ],
+  "daily": {
+   "close": 1.092,
+   "ema50": 1.4748591490148883,
+   "ema50_prev": 1.6083110804878162
+  },
+  "bias": "bear",
+  "kind": "FVG"
+ }
+]
