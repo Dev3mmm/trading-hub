@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="shim.js"></script><title>Fib OTE Monitor</title>
+<style>
+:root{--bg:#0e1116;--card:#161b22;--line:#30363d;--fg:#c9d1d9;--mut:#8b949e;--up:#3fb950;--dn:#f85149;--warn:#f0b90b;--blue:#58a6ff}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,sans-serif;margin:0;padding:16px}
+.wrap{max-width:1200px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}small,.mut,.tag{color:var(--mut)}.tag{font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0}
+.note{background:#2a2410;border:1px solid #6b5a12;color:#e6d68a;border-radius:8px;padding:10px 12px;margin:10px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.stat{background:#0e1116;border:1px solid var(--line);border-radius:6px;padding:8px 10px}.stat b{font-size:18px}
+table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}td{padding:6px 8px;border-bottom:1px solid #21262d}
+tr.c{cursor:pointer}tr.c:hover{background:#1c2330}.up{color:var(--up)}.dn{color:var(--dn)}.warn{color:var(--warn)}
+.badge{display:inline-block;border-radius:4px;padding:1px 7px;font-weight:700;font-size:12px}.b-open{background:#3d3200;color:var(--warn)}.b-hit{background:#1b4332;color:var(--up)}.b-inv{background:#4a1d1d;color:var(--dn)}.b-to{background:#21262d;color:var(--mut)}
+a{color:var(--blue)}img.chart{max-width:100%;border:1px solid var(--line);border-radius:6px;margin-top:8px;display:none}
+</style></head><body><div class="wrap">
+<h1>Fib OTE Monitor <small id="ts"></small> &nbsp;<a href="hub.html">&larr; hub</a></h1>
+<div class="mut">Observation only -- no trading, no money involved. Every ~25 minutes it checks the top liquid coins, decides daily-timeframe bias, finds the matching swing on the 15-minute chart, and when price touches the 0.5&ndash;0.68 retracement zone in that direction it logs the signal and saves the actual chart it used &mdash; so the swing selection can be checked by eye, not trusted blind. Then it just watches: does price reach the 0.3 target within 8 hours, retrace deeper to 0.382, or break the invalidation level?</div>
+<div class="note"><b>Why this exists.</b> The backtested version of this idea (S10-B) looked like it passed, but a cost-accounting bug on the short side made it look better than it was -- once fixed, it does not have a proven edge. This monitor is the honest, no-money way to keep checking the idea live: click any row for the real chart the algorithm drew.</div>
+<div class="card"><h2>Track record so far</h2><div class="stats" id="stats"></div></div>
+<div class="card"><h2>Signals</h2><div id="sig"></div><img id="chartimg" class="chart"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let S=null;
+const f=v=>v==null?'':(Math.abs(v)<1?(+v).toPrecision(5):(+v).toLocaleString(undefined,{maximumFractionDigits:v<100?4:1}));
+function badge(status){
+  if(status==='open')return '<span class="badge b-open">OPEN</span>';
+  if(status==='REACHED TARGET')return '<span class="badge b-hit">HIT TARGET</span>';
+  if(status==='INVALIDATED')return '<span class="badge b-inv">INVALIDATED</span>';
+  return '<span class="badge b-to">TIMED OUT</span>';
+}
+function render(){
+  if(!S||!S.length){$('sig').innerHTML='<div class="mut">No signals yet -- first scan still running.</div>';return}
+  const resolved=S.filter(r=>r.status!=='open');
+  const hit=resolved.filter(r=>r.status==='REACHED TARGET').length;
+  const inv=resolved.filter(r=>r.status==='INVALIDATED').length;
+  const to=resolved.filter(r=>r.status==='TIMED OUT').length;
+  $('stats').innerHTML=[['Total signals',S.length,''],['Open',S.length-resolved.length,'warn'],['Hit target',hit,'up'],['Invalidated',inv,'dn'],['Timed out',to,'']]
+    .map(([a,b,c])=>`<div class="stat"><div class="tag">${a}</div><b class="${c}">${b}</b></div>`).join('');
+  const rows=[...S].reverse().map(r=>`<tr class="c" data-img="${r.chart}"><td>${new Date(r.signal_time).toLocaleString([],{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>`+
+    `<td><b>${r.sym}</b></td><td class="${r.dir==='LONG'?'up':'dn'}">${r.dir}</td><td>${r.htf_bias}</td><td>${r.has_fvg?'yes':'no'}</td>`+
+    `<td>${f(r.zone_lo)}&ndash;${f(r.zone_hi)}</td><td>${f(r.target)}</td><td>${f(r.deep_0382)}</td><td>${f(r.stop)}</td><td>${badge(r.status)}</td></tr>`).join('');
+  $('sig').innerHTML=`<table><tr><th>Signal time</th><th>Coin</th><th>Dir</th><th>HTF bias</th><th>FVG?</th><th>0.5-0.68 zone</th><th>0.3 target</th><th>0.382 deep</th><th>Invalidation</th><th>Status</th></tr>${rows}</table><div class="tag">Click any row to see the actual chart the algorithm used.</div>`;
+}
+document.addEventListener('click',e=>{const r=e.target.closest('tr.c');if(!r)return;const img=$('chartimg');img.src=r.dataset.img+'?t='+Date.now();img.style.display='block';img.scrollIntoView({behavior:'smooth',block:'nearest'})});
+async function tick(){try{S=await (await fetch('api/fib')).json();$('ts').textContent='updated '+new Date().toLocaleTimeString();render()}catch(e){}}
+tick();setInterval(tick,60000);
+</script></body></html>
